@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STACKLY — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --teal:#4fa8a8;--teal-light:#7ec8c8;--teal-dark:#3a8686;
+  --slate:#4a6fa5;--deep:#1a2e4a;--deep2:#0e1c2e;
+  --powder-lt:#e4edf5;--muted:#607488;--gold:#f0a833;
+  --sidebar-w:270px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:#f4f6f9;overflow-x:hidden;}
+
+.dash-layout{display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:linear-gradient(180deg,#0e1c2e 0%,#1a2e4a 100%);
+  min-height:100vh;display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;overflow-y:auto;
+  z-index:300;transition:transform 0.3s ease;
+}
+.sidebar-logo{
+  padding:24px 22px 18px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.nav-logo-img{height:34px;width:auto;filter:brightness(0) invert(1);flex-shrink:0;}
+
+/* Close button inside sidebar logo row — mobile only */
+.sidebar-close-btn{
+  display:none;
+  margin-left:auto;
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.6);font-size:16px;cursor:pointer;
+  align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.sidebar-close-btn:hover{background:rgba(255,255,255,0.16);color:white;}
+
+/* Admin info block — NO avatar, just text */
+.admin-badge{
+  padding:14px 22px 16px;
+  background:rgba(79,168,168,0.1);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  margin-bottom:6px;
+  min-width:0;
+}
+.admin-name{
+  color:white;font-size:13px;font-weight:700;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.admin-role{color:var(--teal-light);font-size:11px;font-weight:600;margin-top:3px;}
+.admin-email{
+  color:rgba(255,255,255,0.42);font-size:11px;margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;
+}
+
+.nav-section{padding:10px 18px 4px;color:rgba(255,255,255,0.25);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 18px;margin:2px 8px;border-radius:12px;color:rgba(255,255,255,0.52);font-size:13px;font-weight:500;cursor:pointer;transition:all .22s;text-decoration:none;}
+.nav-item:hover{background:rgba(126,200,200,0.12);color:var(--teal-light);}
+.nav-item.active{background:rgba(79,168,168,0.2);color:var(--teal-light);border:1px solid rgba(79,168,168,0.25);}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:#fb7185;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
+.nav-badge.gold{background:#f0a833;}
+
+.logout-btn{
+  width:calc(100% - 16px);margin:8px;padding:11px;
+  background:rgba(251,113,133,0.1);border:1px solid rgba(251,113,133,0.2);
+  border-radius:12px;color:#fb7185;font-size:13px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .3s;font-family:'DM Sans',sans-serif;
+}
+.logout-btn:hover{background:rgba(251,113,133,0.2);}
+
+/* overlay */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:299;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+
+/* ══ MAIN ══ */
+.dash-main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;transition:margin-left 0.3s;}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  background:white;border-bottom:1px solid rgba(0,0,0,0.07);
+  padding:0 28px;height:68px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:50;
+  box-shadow:0 1px 12px rgba(0,0,0,0.04);gap:12px;
+}
+.topbar-left{flex:1;min-width:0;}
+.topbar-left h1{font-family:'Playfair Display',serif;font-size:20px;color:var(--deep);font-weight:700;}
+.topbar-left p{color:var(--muted);font-size:12px;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+
+/* Mobile open-sidebar button in topbar */
+.topbar-menu-btn{
+  display:none;
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));
+  border:none;cursor:pointer;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 4px 14px rgba(79,168,168,0.4);
+  flex-shrink:0;
+}
+.topbar-menu-btn span{display:block;width:16px;height:2px;background:white;border-radius:2px;}
+
+.top-tag{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(79,168,168,0.1);color:var(--teal-dark);}
+.top-tag.red{background:rgba(251,113,133,0.1);color:#f43f5e;}
+.tb-btn{padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .3s;}
+.tb-primary{background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));color:white;}
+.tb-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,168,168,0.3);}
+.notif-btn{width:38px;height:38px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;position:relative;flex-shrink:0;}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#fb7185;border-radius:50%;border:2px solid white;}
+
+.content{padding:24px 28px;}
+
+/* ══ KPI HEADER ══ */
+.kpi-header{
+  background:linear-gradient(135deg,#0e1c2e 0%,#1a2e4a 55%,#35517a 100%);
+  border-radius:22px;padding:32px 36px;position:relative;overflow:hidden;margin-bottom:20px;
+}
+.kpi-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 90% 50%,rgba(126,200,200,0.18) 0%,transparent 60%);}
+.kpi-header::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(126,200,200,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(126,200,200,0.04) 1px,transparent 1px);background-size:40px 40px;}
+.kpi-inner{position:relative;z-index:1;display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center;}
+.kpi-eyebrow{color:rgba(255,255,255,0.42);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.kpi-headline{font-family:'Playfair Display',serif;font-size:clamp(22px,2.8vw,34px);color:white;font-weight:700;margin-bottom:4px;}
+.kpi-sub{color:rgba(255,255,255,0.42);font-size:12px;}
+.kpi-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;}
+.kpi-metric{text-align:center;}
+.kpi-val{font-size:clamp(20px,2.2vw,30px);font-weight:700;color:white;font-family:'Space Grotesk',sans-serif;}
+.kpi-val.teal{color:var(--teal-light);}.kpi-val.gold{color:#fbbf24;}.kpi-val.rose{color:#fb7185;}.kpi-val.sky{color:#38bdf8;}
+.kpi-lbl{color:rgba(255,255,255,0.38);font-size:10px;margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+.kpi-change{font-size:10px;margin-top:2px;}
+.kpi-up{color:#22c55e;}.kpi-dn{color:#fb7185;}
+
+/* ══ GRIDS ══ */
+.four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:20px;}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px;}
+.two-col-eq{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+
+/* ══ METRIC CARD ══ */
+.metric-card{background:white;border-radius:16px;padding:20px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 2px 14px rgba(0,0,0,0.04);transition:all .3s;}
+.metric-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,0.09);}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.mc-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.mc-icon.teal{background:rgba(79,168,168,0.1);}.mc-icon.gold{background:rgba(240,168,51,0.1);}.mc-icon.sky{background:rgba(106,168,208,0.1);}.mc-icon.rose{background:rgba(251,113,133,0.1);}
+.mc-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-up{background:rgba(34,197,94,0.1);color:#16a34a;}.badge-dn{background:rgba(251,113,133,0.1);color:#f43f5e;}.badge-neutral{background:rgba(107,114,128,0.1);color:#6b7280;}
+.mc-val{font-size:28px;font-weight:700;color:var(--deep);margin-bottom:2px;font-family:'Space Grotesk',sans-serif;}
+.mc-lbl{color:var(--muted);font-size:12px;}
+.mc-bar{height:4px;background:#f0f0f0;border-radius:2px;margin-top:12px;overflow:hidden;}
+.mc-fill{height:100%;border-radius:2px;}
+
+/* ══ CARD ══ */
+.card{background:white;border-radius:18px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 2px 14px rgba(0,0,0,0.04);overflow:hidden;}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);}
+.card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--deep);}
+.card-actions{display:flex;gap:8px;align-items:center;}
+.action-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .3s;}
+.ab-outline{background:none;border:1px solid rgba(79,168,168,0.25);color:var(--teal);}
+.ab-fill{background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));color:white;}
+.card-body{padding:20px;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{text-align:left;padding:7px 10px;color:var(--muted);font-weight:600;text-transform:uppercase;font-size:9px;letter-spacing:1px;border-bottom:1px solid rgba(0,0,0,0.06);}
+.data-table td{padding:11px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:#374151;}
+.data-table tr:last-child td{border:none;}
+.data-table tr:hover td{background:rgba(79,168,168,0.02);}
+.td-name{font-weight:600;color:var(--deep);}
+.td-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.td-flex{display:flex;align-items:center;gap:9px;}
+.status-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;}
+.pill-active{background:rgba(34,197,94,0.12);color:#16a34a;}.pill-pending{background:rgba(251,191,36,0.12);color:#d97706;}.pill-critical{background:rgba(251,113,133,0.12);color:#f43f5e;}.pill-discharged{background:rgba(107,114,128,0.12);color:#6b7280;}.pill-teal{background:rgba(79,168,168,0.12);color:var(--teal-dark);}
+.td-action{background:none;border:1px solid rgba(79,168,168,0.2);color:var(--teal);border-radius:6px;padding:4px 9px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;}
+.td-action:hover{background:rgba(79,168,168,0.08);}
+
+/* HBAR */
+.hbar-item{margin-bottom:14px;}
+.hbar-header{display:flex;justify-content:space-between;margin-bottom:5px;}
+.hbar-label{color:#374151;font-size:12px;font-weight:500;}
+.hbar-val{color:var(--teal);font-size:12px;font-weight:700;}
+.hbar-track{height:7px;background:#f0f0f0;border-radius:4px;overflow:hidden;}
+.hbar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal-dark),var(--teal-light));}
+
+/* ALERTS */
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid transparent;}
+.alert-item:last-child{margin-bottom:0;}
+.alert-red{background:rgba(251,113,133,0.06);border-color:rgba(251,113,133,0.15);}
+.alert-yellow{background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.15);}
+.alert-teal{background:rgba(79,168,168,0.06);border-color:rgba(79,168,168,0.15);}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-weight:700;font-size:12px;color:var(--deep);margin-bottom:2px;}
+.alert-text{font-size:11px;color:var(--muted);line-height:1.4;}
+.alert-time{font-size:9px;color:#9ca3af;margin-top:3px;}
+
+/* STAFF */
+.staff-card{background:white;border-radius:14px;border:1px solid rgba(0,0,0,0.06);padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all .3s;}
+.staff-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,0.09);}
+.staff-avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 10px;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));}
+.staff-name{font-weight:700;color:var(--deep);font-size:13px;margin-bottom:2px;}
+.staff-dept{color:var(--muted);font-size:11px;margin-bottom:7px;}
+.staff-status{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+
+/* CHART */
+.chart-bars{display:flex;align-items:flex-end;gap:7px;height:130px;padding:0 2px;}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bar{width:100%;border-radius:5px 5px 0 0;transition:all .3s;cursor:pointer;}
+.bar-label{font-size:9px;color:var(--muted);font-weight:600;}
+
+/* QUICK STATS */
+.quick-stat{background:linear-gradient(135deg,var(--deep),var(--slate));border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.quick-stat:last-child{margin-bottom:0;}
+.qs-label{color:rgba(255,255,255,0.45);font-size:11px;}
+.qs-val{color:white;font-size:18px;font-weight:700;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1400px){.kpi-metrics{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1280px){
+  .four-col{grid-template-columns:repeat(2,1fr);}
+  .three-col{grid-template-columns:1fr 1fr;}
+  .sidebar{width:230px;}
+  .dash-main{margin-left:230px;}
+}
+@media(max-width:1024px){
+  .kpi-inner{grid-template-columns:1fr;}
+  .kpi-metrics{grid-template-columns:repeat(3,1fr);}
+  .three-col{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .two-col-eq{grid-template-columns:1fr;}
+}
+
+/* ══ MOBILE BREAKPOINT ══ */
+@media(max-width:900px){
+  /* Sidebar slides fully off-screen */
+  .sidebar{
+    transform:translateX(-100%);
+    width:280px;
+  }
+  .sidebar.open{transform:translateX(0);}
+
+  /* Show close button inside sidebar */
+  .sidebar-close-btn{display:flex;}
+
+  /* Overlay visible */
+  .sidebar-overlay{display:block;}
+  .sidebar-overlay.active{opacity:1;pointer-events:all;}
+
+  /* Main full width */
+  .dash-main{margin-left:0;}
+
+  /* Topbar: show menu button, remove left padding offset */
+  .topbar{padding:0 14px;gap:12px;}
+  .topbar-menu-btn{display:flex;}
+
+  .three-col{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .kpi-header{padding:24px 20px;}
+  .content{padding:12px;}
+}
+
+@media(max-width:640px){
+  .four-col{grid-template-columns:1fr 1fr;}
+  .kpi-metrics{grid-template-columns:repeat(2,1fr);}
+  .topbar-right .top-tag{display:none;}
+  .topbar-right .tb-primary{display:none;}
+  .topbar-left h1{font-size:16px;}
+  .topbar-left p{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .data-table th:nth-child(3),.data-table td:nth-child(3),
+  .data-table th:nth-child(4),.data-table td:nth-child(4){display:none;}
+}
+@media(max-width:400px){
+  .four-col{grid-template-columns:1fr;}
+  .kpi-metrics{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="./index.html"><img src="logo-stackly.png" alt="STACKLY" class="nav-logo-img"></a>
+    <!-- Close button — mobile only -->
+    <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">✕</button>
+  </div>
+
+  <!-- Admin info — NO avatar, text only -->
+  <div class="admin-badge">
+    <div class="admin-name" id="admin-display-name">Dr. Deepa Venkat</div>
+    <!-- <div class="admin-role">🛡️ Administrator</div> -->
+    <span class="admin-email" id="admin-display-email">admin@stackly.com</span>
+  </div>
+
+  <a href="./admin-dashboard.html" class="nav-item active"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">📈</span> Analytics</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">🏥</span> Hospital Overview</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">🚨</span> Alerts <span class="nav-badge">3</span></a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">🚑</span> Emergency</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">👨‍⚕️</span> Doctors</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">👩‍⚕️</span> Nurses & Staff</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">💼</span> HR Management</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">💰</span> Finance & Revenue</a>
+  <button class="logout-btn" onclick="window.location.href='login.html'">🚪 Sign Out</button>
+</aside>
+
+<!-- MAIN -->
+<main class="dash-main">
+  <div class="topbar">
+    <!-- Open sidebar button — mobile only -->
+    <button class="topbar-menu-btn" id="topbar-menu-btn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-left">
+      <h1>Hospital Admin Dashboard</h1>
+      <p>Tuesday, June 9, 2026 · Real-time Hospital Monitoring</p>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn"><span>🔔</span><span class="notif-dot"></span></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="kpi-header" id="kpi-header">
+      <div class="kpi-inner">
+        <div>
+          <div class="kpi-eyebrow">Live Hospital Metrics</div>
+          <div class="kpi-headline">STACKLY Health<br>Operations Center</div>
+          <div class="kpi-sub">Updated: June 9, 2026 · 09:14 AM</div>
+        </div>
+        <div class="kpi-metrics">
+          <div class="kpi-metric"><div class="kpi-val teal" id="k1">0</div><div class="kpi-lbl">Active Patients</div><div class="kpi-change kpi-up">↑ +42 vs yesterday</div></div>
+          <div class="kpi-metric"><div class="kpi-val gold" id="k2">0</div><div class="kpi-lbl">Staff On Duty</div><div class="kpi-change kpi-up">↑ Full capacity</div></div>
+          <div class="kpi-metric"><div class="kpi-val sky" id="k3">0</div><div class="kpi-lbl">Today's Appts</div><div class="kpi-change kpi-up">↑ 94% attended</div></div>
+          <div class="kpi-metric"><div class="kpi-val rose" id="k4">0</div><div class="kpi-lbl">ER Cases Today</div><div class="kpi-change kpi-dn">↓ -12 vs avg</div></div>
+          <div class="kpi-metric"><div class="kpi-val" id="k5" style="color:#a78bfa;">0<span style="font-size:16px;">%</span></div><div class="kpi-lbl">Bed Occupancy</div><div class="kpi-change kpi-dn">↓ 4% from capacity</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="four-col">
+      <div class="metric-card"><div class="mc-top"><div class="mc-icon teal">💰</div><span class="mc-badge badge-up">↑ 18.4%</span></div><div class="mc-val">₹4.82Cr</div><div class="mc-lbl">Monthly Revenue</div><div class="mc-bar"><div class="mc-fill" style="width:78%;background:linear-gradient(90deg,var(--teal-dark),var(--teal-light));"></div></div></div>
+      <div class="metric-card"><div class="mc-top"><div class="mc-icon gold">📅</div><span class="mc-badge badge-up">↑ 6.2%</span></div><div class="mc-val">1,847</div><div class="mc-lbl">Appointments This Month</div><div class="mc-bar"><div class="mc-fill" style="width:68%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div></div>
+      <div class="metric-card"><div class="mc-top"><div class="mc-icon sky">⭐</div><span class="mc-badge badge-up">↑ 0.3</span></div><div class="mc-val">4.87</div><div class="mc-lbl">Patient Satisfaction</div><div class="mc-bar"><div class="mc-fill" style="width:90%;background:linear-gradient(90deg,#38bdf8,#0ea5e9);"></div></div></div>
+      <div class="metric-card"><div class="mc-top"><div class="mc-icon rose">⏱️</div><span class="mc-badge badge-neutral">Stable</span></div><div class="mc-val">12 <span style="font-size:13px;">min</span></div><div class="mc-lbl">Avg. Wait Time</div><div class="mc-bar"><div class="mc-fill" style="width:35%;background:linear-gradient(90deg,#fb7185,#f43f5e);"></div></div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Recent Patient Admissions</div>
+          <div class="card-actions"><button class="action-btn ab-outline">Export CSV</button><button class="action-btn ab-fill">+ Admit Patient</button></div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Patient</th><th>Ward / Dept.</th><th>Admitted</th><th>Condition</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="td-flex"><div class="td-avatar">R</div><div class="td-name">Rajesh Iyer</div></div></td><td>Cardiology</td><td>June 7</td><td>Post-surgery recovery</td><td><span class="status-pill pill-active">Stable</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">M</div><div class="td-name">Meera Pillai</div></div></td><td>Neurology</td><td>June 6</td><td>Stroke monitoring</td><td><span class="status-pill pill-critical">Critical</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#0369a1,#38bdf8);">S</div><div class="td-name">Suresh Kumar</div></div></td><td>Orthopedics</td><td>June 6</td><td>Hip replacement</td><td><span class="status-pill pill-active">Stable</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24);">L</div><div class="td-name">Lakshmi Rajan</div></div></td><td>Oncology</td><td>June 5</td><td>Chemo cycle 3</td><td><span class="status-pill pill-pending">Under Care</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar">A</div><div class="td-name">Anand Babu</div></div></td><td>Pulmonology</td><td>June 5</td><td>Pneumonia treatment</td><td><span class="status-pill pill-active">Improving</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#be185d,#fb7185);">P</div><div class="td-name">Priyanka Nair</div></div></td><td>Maternity</td><td>June 4</td><td>Post-natal care</td><td><span class="status-pill pill-active">Stable</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#1e3a5f,#38bdf8);">K</div><div class="td-name">Krishnamurthy</div></div></td><td>Cardiology</td><td>June 4</td><td>Heart attack recovery</td><td><span class="status-pill pill-pending">Observation</span></td><td><button class="td-action">View</button></td></tr>
+              <tr><td><div class="td-flex"><div class="td-avatar" style="background:linear-gradient(135deg,#6b7280,#9ca3af);">V</div><div class="td-name">Velu Murugan</div></div></td><td>General</td><td>June 3</td><td>Appendectomy</td><td><span class="status-pill pill-discharged">Discharged</span></td><td><button class="td-action">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card">
+          <div class="card-head"><div class="card-title">🚨 Critical Alerts</div><span style="background:rgba(251,113,133,0.1);color:#f43f5e;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;">3 Active</span></div>
+          <div class="card-body">
+            <div class="alert-item alert-red"><div class="alert-icon">🔴</div><div><div class="alert-title">ICU Bed Capacity Warning</div><div class="alert-text">ICU occupancy at 91%. Only 2 beds available.</div><div class="alert-time">09:02 AM · Just now</div></div></div>
+            <div class="alert-item alert-red"><div class="alert-icon">🔴</div><div><div class="alert-title">Critical Lab Result — Meera Pillai</div><div class="alert-text">INR value 4.2 (critical high). Immediate review required.</div><div class="alert-time">08:45 AM · 29 mins ago</div></div></div>
+            <div class="alert-item alert-yellow"><div class="alert-icon">🟡</div><div><div class="alert-title">Pharmacy Stock Alert</div><div class="alert-text">Insulin Glargine stock below minimum (18 units).</div><div class="alert-time">08:15 AM · 59 mins ago</div></div></div>
+            <div class="alert-item alert-teal"><div class="alert-icon">🟢</div><div><div class="alert-title">System Maintenance Scheduled</div><div class="alert-text">PACS maintenance: Tonight 1:00–3:00 AM.</div><div class="alert-time">07:00 AM · Earlier today</div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div class="quick-stat"><div><div class="qs-label">Surgical Ops Today</div><div class="qs-val">14</div></div><div style="color:#22c55e;font-size:11px;">8 Completed ✓</div></div>
+          <div class="quick-stat" style="margin-top:8px;"><div><div class="qs-label">ER Wait Time Avg</div><div class="qs-val">8 min</div></div><div style="color:#22c55e;font-size:11px;">↓ Below target</div></div>
+          <div class="quick-stat" style="margin-top:8px;"><div><div class="qs-label">Pharmacy Dispensed</div><div class="qs-val">342</div></div><div style="color:rgba(255,255,255,0.4);font-size:11px;">prescriptions today</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Monthly Revenue</div><span style="color:#22c55e;font-size:12px;font-weight:700;">↑ +18.4% YoY</span></div>
+        <div class="card-body">
+          <div class="chart-bars" id="revenue-chart">
+            <div class="bar-group"><div class="bar" style="height:55%;background:linear-gradient(180deg,var(--teal-light),var(--teal-dark));"></div><div class="bar-label">Jan</div></div>
+            <div class="bar-group"><div class="bar" style="height:60%;background:linear-gradient(180deg,var(--teal-light),var(--teal-dark));"></div><div class="bar-label">Feb</div></div>
+            <div class="bar-group"><div class="bar" style="height:50%;background:linear-gradient(180deg,var(--teal-light),var(--teal-dark));"></div><div class="bar-label">Mar</div></div>
+            <div class="bar-group"><div class="bar" style="height:70%;background:linear-gradient(180deg,var(--teal-light),var(--teal-dark));"></div><div class="bar-label">Apr</div></div>
+            <div class="bar-group"><div class="bar" style="height:80%;background:linear-gradient(180deg,var(--teal-light),var(--teal-dark));"></div><div class="bar-label">May</div></div>
+            <div class="bar-group"><div class="bar" style="height:95%;background:linear-gradient(180deg,#fbbf24,#f59e0b);box-shadow:0 4px 20px rgba(251,191,36,0.4);"></div><div class="bar-label" style="color:var(--teal-dark);font-weight:700;">Jun</div></div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-around;text-align:center;">
+            <div><div style="font-size:16px;font-weight:700;color:var(--teal-dark);">₹4.82Cr</div><div style="font-size:10px;color:var(--muted);">This Month</div></div>
+            <div><div style="font-size:16px;font-weight:700;color:var(--deep);">₹3.94Cr</div><div style="font-size:10px;color:var(--muted);">Last Month</div></div>
+            <div><div style="font-size:16px;font-weight:700;color:#22c55e;">+22%</div><div style="font-size:10px;color:var(--muted);">Growth</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Dept. Performance</div><a style="color:var(--teal);font-size:11px;font-weight:600;cursor:pointer;">Full Report →</a></div>
+        <div class="card-body">
+          <div class="hbar-item"><div class="hbar-header"><span class="hbar-label">❤️ Cardiology</span><span class="hbar-val">94%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0" data-w="94%"></div></div></div>
+          <div class="hbar-item"><div class="hbar-header"><span class="hbar-label">🧠 Neurology</span><span class="hbar-val">88%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0;background:linear-gradient(90deg,#7c3aed,#a78bfa);" data-w="88%"></div></div></div>
+          <div class="hbar-item"><div class="hbar-header"><span class="hbar-label">🎗️ Oncology</span><span class="hbar-val">91%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0;background:linear-gradient(90deg,#f43f5e,#fb7185);" data-w="91%"></div></div></div>
+          <div class="hbar-item"><div class="hbar-header"><span class="hbar-label">🦴 Orthopedics</span><span class="hbar-val">82%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0;background:linear-gradient(90deg,#d97706,#fbbf24);" data-w="82%"></div></div></div>
+          <div class="hbar-item"><div class="hbar-header"><span class="hbar-label">👶 Pediatrics</span><span class="hbar-val">96%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0;background:linear-gradient(90deg,#0369a1,#38bdf8);" data-w="96%"></div></div></div>
+          <div class="hbar-item" style="margin-bottom:0;"><div class="hbar-header"><span class="hbar-label">🫁 Pulmonology</span><span class="hbar-val">79%</span></div><div class="hbar-track"><div class="hbar-fill bar-anim" style="width:0;" data-w="79%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col-eq">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Staff On Duty Today</div><button class="action-btn ab-outline">Manage Schedules</button></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div class="staff-card"><div class="staff-avatar">P</div><div class="staff-name">Dr. Priya Menon</div><div class="staff-dept">Cardiology</div><span class="staff-status pill-active">On Duty</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">S</div><div class="staff-name">Dr. Senthil Kumar</div><div class="staff-dept">Neurology</div><span class="staff-status pill-active">On Duty</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24);">A</div><div class="staff-name">Dr. Anjali Kapoor</div><div class="staff-dept">Oncology</div><span class="staff-status pill-pending">In Surgery</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:linear-gradient(135deg,#0369a1,#38bdf8);">R</div><div class="staff-name">Dr. Rahul Nair</div><div class="staff-dept">Endocrinology</div><span class="staff-status pill-active">On Duty</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:linear-gradient(135deg,#be185d,#fb7185);">N</div><div class="staff-name">Nurse Nalini</div><div class="staff-dept">ICU Head Nurse</div><span class="staff-status pill-active">On Duty</span></div>
+            <div class="staff-card"><div class="staff-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">K</div><div class="staff-name">Dr. Karthik V.</div><div class="staff-dept">Pediatrics</div><span class="staff-status pill-active">On Duty</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Today's Appointments</div><span style="color:var(--teal-dark);font-size:12px;font-weight:700;">187 Total</span></div>
+        <div class="card-body" style="padding:0;">
+          <table class="data-table">
+            <thead><tr><th>Patient</th><th>Doctor</th><th>Time</th><th>Type</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><div class="td-name">Kavitha R.</div></td><td>Dr. Priya Menon</td><td>09:00 AM</td><td>Cardiology</td><td><span class="status-pill pill-active">Done ✓</span></td></tr>
+              <tr><td><div class="td-name">Mohan S.</div></td><td>Dr. Senthil Kumar</td><td>09:30 AM</td><td>Neuro</td><td><span class="status-pill pill-active">Done ✓</span></td></tr>
+              <tr><td><div class="td-name">Arjun Sharma</div></td><td>Dr. Rahul Nair</td><td>10:00 AM</td><td>Endocrine</td><td><span class="status-pill pill-pending">In Progress</span></td></tr>
+              <tr><td><div class="td-name">Devi Krishnan</div></td><td>Dr. Anjali Kapoor</td><td>10:30 AM</td><td>Oncology</td><td><span class="status-pill pill-pending">Waiting</span></td></tr>
+              <tr><td><div class="td-name">Bala Subra.</div></td><td>Dr. Karthik V.</td><td>11:00 AM</td><td>Pediatrics</td><td><span class="status-pill pill-pending">Waiting</span></td></tr>
+              <tr><td><div class="td-name">Geetha P.</div></td><td>Dr. Priya Menon</td><td>11:30 AM</td><td>Cardiology</td><td><span class="status-pill" style="background:rgba(156,163,175,0.12);color:#6b7280;">Scheduled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+/* ══ SESSION ══ */
+(function(){
+  try {
+    const u = JSON.parse(sessionStorage.getItem('medicore_current_user') || '{}');
+    if (u.name) {
+      document.getElementById('admin-display-name').textContent = u.name;
+    }
+    const email = u.email || u.mail || u.username || '';
+    if (email) {
+      const el = document.getElementById('admin-display-email');
+      if (el) el.textContent = email;
+    }
+  } catch(e) {}
+})();
+
+/* ══ SIDEBAR TOGGLE — clean two-button pattern ══ */
+const sidebar  = document.getElementById('sidebar');
+const overlay  = document.getElementById('sidebar-overlay');
+const menuBtn  = document.getElementById('topbar-menu-btn');   // opens sidebar (in topbar)
+const closeBtn = document.getElementById('sidebar-close-btn'); // closes sidebar (inside sidebar)
+
+function isMobile() { return window.innerWidth <= 900; }
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+menuBtn.addEventListener('click', openSidebar);
+closeBtn.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+window.addEventListener('resize', () => {
+  if (!isMobile()) closeSidebar();
+});
+
+/* ══ NAV ══ */
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('mouseenter', () => gsap.to(item, { x:4, duration:.18 }));
+  item.addEventListener('mouseleave', () => gsap.to(item, { x:0, duration:.18 }));
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    if (isMobile()) closeSidebar();
+  });
+});
+
+/* ══ GSAP ══ */
+gsap.registerPlugin(ScrollTrigger);
+if (!isMobile()) {
+  gsap.fromTo('.sidebar', { x:-30, opacity:0 }, { x:0, opacity:1, duration:.7, ease:'power3.out' });
+}
+gsap.fromTo('#kpi-header', { opacity:0, y:30 }, { opacity:1, y:0, duration:.8, ease:'power3.out', delay:.2 });
+gsap.fromTo('.metric-card', { opacity:0, y:20 }, { opacity:1, y:0, stagger:.07, duration:.6, ease:'power3.out', delay:.4 });
+
+const kpiData = [
+  { id:'k1', n:1247 }, { id:'k2', n:342 }, { id:'k3', n:187 },
+  { id:'k4', n:38 }, { id:'k5', n:78, pct:true }
+];
+kpiData.forEach((k, i) => {
+  gsap.to({ n:0 }, { n:k.n, duration:1.8+i*.1, delay:.6, ease:'power2.out',
+    onUpdate() {
+      const el = document.getElementById(k.id);
+      if (el) {
+        if (k.pct) el.innerHTML = Math.round(this.targets()[0].n) + '<span style="font-size:16px;">%</span>';
+        else el.textContent = Math.round(this.targets()[0].n).toLocaleString();
+      }
+    }
+  });
+});
+
+gsap.utils.toArray('.card,.metric-card').forEach(el => {
+  gsap.fromTo(el, { opacity:0, y:22 }, { opacity:1, y:0, duration:.65, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 90%', once:true } });
+});
+
+ScrollTrigger.create({ trigger:'#revenue-chart', start:'top 82%', once:true, onEnter:() => {
+  document.querySelectorAll('#revenue-chart .bar').forEach((bar, i) => {
+    const h = bar.style.height; bar.style.height = '0';
+    gsap.to(bar, { height:h, duration:.75, ease:'power3.out', delay:i*.07 });
+  });
+}});
+
+ScrollTrigger.create({ trigger:'.hbar-item', start:'top 82%', once:true, onEnter:() => {
+  document.querySelectorAll('.bar-anim').forEach((bar, i) => {
+    gsap.to(bar, { width:bar.getAttribute('data-w'), duration:1.1, ease:'power3.out', delay:i*.09 });
+  });
+}});
+
+document.querySelectorAll('.metric-card,.staff-card').forEach(card => {
+  card.addEventListener('mouseenter', () => gsap.to(card, { scale:1.02, duration:.18 }));
+  card.addEventListener('mouseleave', () => gsap.to(card, { scale:1, duration:.18 }));
+});
+</script>
+</body>
+</html>

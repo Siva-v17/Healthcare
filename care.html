@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Care Programs — MediCore Health</title>
+<link rel="stylesheet" href="main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+
+
+/*NAVBAR */
+nav.navbar{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:500!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 5%!important;height:72px!important;background:var(--deep2)!important;backdrop-filter:blur(12px)!important;border-bottom:1px solid rgba(255,255,255,0.07)!important;box-sizing:border-box!important;}
+nav.navbar a.nav-logo{display:flex!important;align-items:center!important;text-decoration:none!important;}
+nav.navbar img.nav-logo-img{height:36px!important;width:auto!important;object-fit:contain!important;filter:brightness(0) invert(1)!important;display:block!important;}
+nav.navbar ul.nav-links{display:flex!important;list-style:none!important;gap:32px!important;align-items:center!important;margin:0!important;padding:0!important;flex-wrap:nowrap!important;}
+nav.navbar ul.nav-links li{display:list-item!important;margin:0!important;padding:0!important;}
+nav.navbar ul.nav-links li a.nav-link,
+nav.navbar a.nav-link{color:rgba(255,255,255,0.7)!important;text-decoration:none!important;font-size:14px!important;font-weight:500!important;font-family:'DM Sans',sans-serif!important;transition:color 0.2s!important;white-space:nowrap!important;}
+nav.navbar ul.nav-links li a.nav-link:hover,
+nav.navbar ul.nav-links li a.nav-link.active{color:#14b8a6!important;}
+nav.navbar .nav-cta{display:flex!important;gap:12px!important;align-items:center!important;flex-shrink:0!important;}
+nav.navbar a.btn-outline{padding:9px 20px!important;border:1.5px solid rgba(20,184,166,0.5)!important;border-radius:10px!important;color:#14b8a6!important;font-size:13px!important;font-weight:600!important;text-decoration:none!important;transition:all 0.3s!important;white-space:nowrap!important;background:transparent!important;}
+nav.navbar a.btn-outline:hover{background:rgba(13,148,136,0.1)!important;}
+nav.navbar a.btn-primary{padding:10px 22px!important;background:linear-gradient(135deg,#0d9488,#14b8a6)!important;border-radius:10px!important;color:white!important;font-size:13px!important;font-weight:700!important;text-decoration:none!important;display:inline-flex!important;align-items:center!important;transition:all 0.3s!important;white-space:nowrap!important;border:none!important;}
+nav.navbar a.btn-primary:hover{transform:translateY(-1px)!important;box-shadow:0 6px 20px rgba(13,148,136,0.4)!important;}
+button.nav-toggle{display:none!important;flex-direction:column!important;gap:5px!important;background:none!important;border:none!important;cursor:pointer!important;padding:4px!important;flex-shrink:0!important;}
+button.nav-toggle span{display:block!important;width:22px!important;height:2px!important;background:white!important;border-radius:2px!important;transition:all 0.3s!important;}
+div.mobile-nav{display:none;position:fixed!important;inset:0!important;background:rgba(1,31,30,0.98)!important;z-index:499!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:24px!important;}
+div.mobile-nav.open{display:flex!important;}
+div.mobile-nav a.nav-link{color:white!important;font-size:18px!important;}
+button.mobile-nav-close{position:absolute!important;top:20px!important;right:20px!important;background:none!important;border:none!important;color:white!important;font-size:28px!important;cursor:pointer!important;}
+/* Desktop: always show nav-links; hide hamburger */
+@media(min-width:901px){
+  nav.navbar ul.nav-links{display:flex!important;}
+  nav.navbar .nav-cta{display:flex!important;}
+  button.nav-toggle{display:none!important;}
+}
+/* Mobile: hide nav-links, show hamburger */
+@media(max-width:900px){
+  nav.navbar ul.nav-links{display:none!important;}
+  nav.navbar .nav-cta{display:none!important;}
+  button.nav-toggle{display:flex!important;}
+}
+
+.page-hero {
+  color: white; min-height:60vh; background:var(--deep2); display:flex; align-items:center; justify-content:center; text-align:center; padding-top:80px; position:relative; overflow:hidden; }
+.page-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 60%, rgba(13,148,136,0.2) 0%, transparent 70%); }
+.page-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(48px,7vw,90px); color:white; font-weight:900; margin-bottom:20px; position:relative; z-index:1; }
+.page-hero p { color:rgba(255,255,255,0.65); font-size:18px; max-width:600px; margin:0 auto; position:relative; z-index:1; }
+.breadcrumb { display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:20px; position:relative; z-index:1; }
+.breadcrumb a { color:var(--teal-light); text-decoration:none; font-size:14px; }
+.breadcrumb span { color:rgba(255,255,255,0.4); font-size:14px; }
+
+/* CARE JOURNEY */
+.care-journey { background:white; }
+.journey-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:0; position:relative; margin-top:60px; }
+.journey-steps::before { content:''; position:absolute; top:40px; left:10%; right:10%; height:2px; background:linear-gradient(90deg,var(--teal),var(--teal-light)); z-index:0; }
+.journey-step { text-align:center; position:relative; z-index:1; padding:0 10px; }
+.j-num { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--teal-light)); color:white; font-family:'Playfair Display',serif; font-size:28px; font-weight:900; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; box-shadow:0 8px 30px rgba(13,148,136,0.4); }
+.j-title { font-size:14px; font-weight:700; color:var(--deep); margin-bottom:8px; }
+.j-desc { font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* PROGRAM CARDS */
+.program-card { background:white; border-radius:30px; overflow:hidden; border:1px solid var(--border); transition:all 0.4s; display:flex; flex-direction:column; }
+.program-card:hover { transform:translateY(-10px); box-shadow:var(--shadow-lg); }
+.prog-img { height:240px; overflow:hidden; position:relative; }
+.prog-img img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s; }
+.program-card:hover .prog-img img { transform:scale(1.06); }
+.prog-badge { position:absolute; top:16px; left:16px; background:rgba(4,47,46,0.8); backdrop-filter:blur(10px); color:white; padding:6px 16px; border-radius:50px; font-size:12px; font-weight:700; }
+.prog-body { padding:28px; flex:1; display:flex; flex-direction:column; }
+.prog-body h3 { font-size:20px; font-weight:700; color:var(--deep); margin-bottom:10px; }
+.prog-body p { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:20px; flex:1; }
+.prog-includes { list-style:none; margin-bottom:24px; }
+.prog-includes li { font-size:13px; color:var(--deep); display:flex; align-items:center; gap:8px; padding:5px 0; }
+.prog-includes li::before { content:'✦'; color:var(--teal); font-size:10px; }
+.prog-footer { display:flex; align-items:center; justify-content:space-between; padding:16px 28px; border-top:1px solid var(--border); }
+.prog-price { font-family:'Playfair Display',serif; font-size:22px; font-weight:900; color:var(--teal); }
+.prog-price span { font-size:13px; color:var(--muted); font-family:'DM Sans',sans-serif; font-weight:400; }
+
+/* TELEHEALTH */
+.telehealth { background:linear-gradient(var(--deep),var(--deep2)); padding:100px 5%; }
+.tele-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.tele-phone { position:relative; height:560px; display:flex; justify-content:center; }
+.phone-frame { width:280px; height:540px; background:var(--deep2); border-radius:40px; border:8px solid rgba(255,255,255,0.15); overflow:hidden; position:relative; box-shadow:0 40px 100px rgba(0,0,0,0.5); }
+.phone-screen { width:100%; height:100%; background:var(--deep2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+.phone-avatar{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    overflow:hidden;
+    border:4px solid #14b8a6;
+}
+
+.phone-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center 25%;
+    display:block;
+}
+.phone-status { display:flex; align-items:center; gap:8px; color:white; font-size:14px; }
+.phone-dot { width:8px; height:8px; background:#22c55e; border-radius:50%; animation:pulse-ring 1.5s ease-out infinite; }
+.phone-controls { display:flex; gap:16px; margin-top:20px; }
+.phone-btn { width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:default; }
+.phone-btn.red { background:#ef4444; }
+.phone-btn.green { background:#22c55e; }
+.phone-btn.gray { background:rgba(255,255,255,0.2); }
+.floating-notif { position:absolute; background:rgba(255,255,255,0.1); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.2); border-radius:16px; padding:14px 18px; color:white; }
+.floating-notif.n1 { top:40px; right:-40px; }
+.floating-notif.n2 { bottom:100px; right:-60px; }
+.notif-title { font-size:13px; font-weight:700; }
+.notif-sub { font-size:11px; opacity:0.7; margin-top:2px; }
+
+/* WELLNESS */
+.wellness { background:var(--white); }
+.wellness-card { background:white; border-radius:20px; padding:32px; border:1px solid var(--border); display:flex; gap:20px; align-items:flex-start; transition:all 0.4s; }
+.wellness-card:hover { transform:translateY(-6px); box-shadow:var(--shadow); }
+.wellness-icon { font-size:36px; flex-shrink:0; }
+.wellness-card h3 { font-size:17px; font-weight:700; color:var(--deep); margin-bottom:8px; }
+.wellness-card p { font-size:13px; color:var(--muted); line-height:1.7; }
+
+/* EMERGENCY */
+.emergency { background:linear-gradient(135deg,#dc2626,#b91c1c); color:white; padding:80px 5%; text-align:center; position:relative; overflow:hidden; }
+.emergency::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 60%); }
+.emergency h2 { font-family:'Playfair Display',serif; font-size:clamp(36px,5vw,64px); font-weight:900; margin-bottom:16px; position:relative; z-index:1; }
+.emergency p { font-size:18px; opacity:0.85; margin-bottom:36px; position:relative; z-index:1; }
+.emergency-num { font-family:'Playfair Display',serif; font-size:clamp(48px,8vw,96px); font-weight:900; letter-spacing:-2px; position:relative; z-index:1; }
+</style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <img src="logo-stackly.png" alt="Stackly" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Home</a></li>
+    <li><a href="about.html" class="nav-link">About</a></li>
+    <li><a href="services.html" class="nav-link">Services</a></li>
+    <li><a href="care.html" class="nav-link active">Care</a></li>
+    <li><a href="blog.html" class="nav-link">Blog</a></li>
+    <li><a href="contact.html" class="nav-link">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-outline">Login</a>
+    <a href="contact.html" class="btn-primary">Book Appointment ✦</a>
+  </div>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="nav-link">Home</a>
+  <a href="about.html" class="nav-link">About</a>
+  <a href="services.html" class="nav-link">Services</a>
+  <a href="care.html" class="nav-link active">Care</a>
+  <a href="blog.html" class="nav-link">Blog</a>
+  <a href="contact.html" class="nav-link">Contact</a>
+  <a href="login.html" class="btn-primary" style="margin-top:16px">Login</a>
+</div>
+
+<section class="page-hero">
+  <div>
+    <div class="breadcrumb reveal"><a href="index.html">Home</a><span>/</span><span style="color:white">Care Programs</span></div>
+    <h1 class="reveal">Patient <span style="color:var(--teal-light)">Care</span> Programs</h1>
+    <p class="reveal">Holistic care pathways designed around your unique health needs and life goals</p>
+  </div>
+</section>
+
+<!-- CARE JOURNEY -->
+<section class="care-journey section">
+  <div style="text-align:center;">
+    <div class="section-label reveal">How It Works</div>
+    <h2 class="section-title reveal" style="color:var(--deep);">Your <span>Care Journey</span></h2>
+    <p class="section-subtitle reveal" style="margin:0 auto; text-align:center;">From first contact to long-term wellness — we walk every step with you.</p>
+  </div>
+  <div class="journey-steps stagger-parent">
+    <div class="journey-step stagger-child">
+      <div class="j-num">1</div>
+      <div class="j-title">Initial Consultation</div>
+      <div class="j-desc">Meet with a care coordinator to discuss your needs and medical history</div>
+    </div>
+    <div class="journey-step stagger-child">
+      <div class="j-num">2</div>
+      <div class="j-title">Comprehensive Assessment</div>
+      <div class="j-desc">Full diagnostic workup including labs, imaging, and specialist evaluations</div>
+    </div>
+    <div class="journey-step stagger-child">
+      <div class="j-num">3</div>
+      <div class="j-title">Personalized Care Plan</div>
+      <div class="j-desc">Multidisciplinary team creates your individualized treatment roadmap</div>
+    </div>
+    <div class="journey-step stagger-child">
+      <div class="j-num">4</div>
+      <div class="j-title">Treatment & Support</div>
+      <div class="j-desc">Coordinated treatment with continuous monitoring and adjustments</div>
+    </div>
+    <div class="journey-step stagger-child">
+      <div class="j-num">5</div>
+      <div class="j-title">Long-Term Wellness</div>
+      <div class="j-desc">Ongoing preventive care, annual check-ups, and lifestyle coaching</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section class="section" style="background:#f8fffe;">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label reveal">Our Programs</div>
+    <h2 class="section-title reveal" style="color:var(--deep);">Care Plans <span>Built for Life</span></h2>
+  </div>
+  <div class="grid-3 stagger-parent">
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=90" alt="Preventive Care">
+        <span class="prog-badge">🛡️ Preventive</span>
+      </div>
+      <div class="prog-body">
+        <h3>Preventive Wellness Program</h3>
+        <p>Stay ahead of illness with our proactive health monitoring, annual screenings, and personalized wellness coaching.</p>
+        <ul class="prog-includes">
+          <li>Annual Comprehensive Physical</li>
+          <li>Cancer Screening Panel</li>
+          <li>Cardiovascular Risk Assessment</li>
+          <li>Nutritional Counseling</li>
+          <li>Stress Management Sessions</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$89<span>/month</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=90" alt="Chronic Disease">
+        <span class="prog-badge">💊 Chronic Care</span>
+      </div>
+      <div class="prog-body">
+        <h3>Chronic Disease Management</h3>
+        <p>Structured support for diabetes, hypertension, heart disease, and other long-term conditions.</p>
+        <ul class="prog-includes">
+          <li>Monthly Specialist Check-ins</li>
+          <li>Continuous Glucose Monitoring</li>
+          <li>Medication Optimization</li>
+          <li>Lifestyle Coaching</li>
+          <li>24/7 Nurse Hotline</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$149<span>/month</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&q=90" alt="Executive Health">
+        <span class="prog-badge">👔 Executive</span>
+      </div>
+      <div class="prog-body">
+        <h3>Executive Health Program</h3>
+        <p>The ultimate health assessment for busy professionals — complete in a single day.</p>
+        <ul class="prog-includes">
+          <li>Full-Body MRI & CT Scan</li>
+          <li>Executive Blood Panel (60+ markers)</li>
+          <li>Cardiac Stress Test</li>
+          <li>Cognitive Assessment</li>
+          <li>Personal Health Concierge</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$2,499<span>/year</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1484863137850-59afcfe05386?w=800&q=90" alt="Women's Health">
+        <span class="prog-badge">🌸 Women's Health</span>
+      </div>
+      <div class="prog-body">
+        <h3>Women's Wellness Program</h3>
+        <p>Comprehensive care addressing women's unique health needs across every life stage.</p>
+        <ul class="prog-includes">
+          <li>Gynecology & OB Services</li>
+          <li>Hormone Balance Assessment</li>
+          <li>Bone Density Screening</li>
+          <li>Menopause Support</li>
+          <li>Fertility Consultation</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$119<span>/month</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1535914254981-b5012eebbd15?w=800&q=90" alt="Senior Care">
+        <span class="prog-badge">🌟 Senior Care</span>
+      </div>
+      <div class="prog-body">
+        <h3>Senior Wellness Program</h3>
+        <p>Specialized care for adults 65+ focusing on independence, cognition, and quality of life.</p>
+        <ul class="prog-includes">
+          <li>Geriatric Assessment</li>
+          <li>Falls Prevention Program</li>
+          <li>Memory Care Screening</li>
+          <li>Home Visit Option</li>
+          <li>Caregiver Support</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$99<span>/month</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+    <div class="program-card stagger-child">
+      <div class="prog-img">
+        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=90" alt="Mental Health">
+        <span class="prog-badge">🧠 Mental Health</span>
+      </div>
+      <div class="prog-body">
+        <h3>Mental Wellness Program</h3>
+        <p>Integrated mental health support combining psychiatry, therapy, and wellness coaching.</p>
+        <ul class="prog-includes">
+          <li>Psychiatric Evaluation</li>
+          <li>Weekly Therapy Sessions</li>
+          <li>Medication Management</li>
+          <li>Mindfulness Training</li>
+          <li>Crisis Support Line</li>
+        </ul>
+      </div>
+      <div class="prog-footer">
+        <div class="prog-price">$179<span>/month</span></div>
+        <a href="contact.html" class="btn-primary">Enroll ✦</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TELEHEALTH -->
+<section class="telehealth">
+  <div class="tele-grid">
+    <div>
+      <div class="section-label reveal" style="color:var(--teal-light);">Virtual Care</div>
+      <h2 class="section-title reveal" style="color:white;">World-Class Care, <span>Anywhere You Are</span></h2>
+      <p style="color:rgba(255,255,255,0.65); font-size:16px; line-height:1.8; margin-bottom:32px;" class="reveal">Our HIPAA-secure telemedicine platform connects you with MediCore specialists in minutes — from your phone, tablet, or computer.</p>
+      <div class="grid-2 reveal" style="gap:16px; margin-bottom:32px;">
+        <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:20px; text-align:center;">
+          <div style="font-family:'Playfair Display',serif; font-size:32px; color:white; font-weight:900;">3 min</div>
+          <div style="color:rgba(255,255,255,0.6); font-size:13px; margin-top:4px;">Average wait time</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:20px; text-align:center;">
+          <div style="font-family:'Playfair Display',serif; font-size:32px; color:white; font-weight:900;">24/7</div>
+          <div style="color:rgba(255,255,255,0.6); font-size:13px; margin-top:4px;">Always available</div>
+        </div>
+      </div>
+      <a href="contact.html" class="btn-primary reveal">Start Telehealth Visit ✦</a>
+    </div>
+    <div class="tele-phone reveal">
+      <div class="phone-frame float">
+        <div class="phone-screen">
+          <div class="phone-status"><div class="phone-dot"></div> Live Consultation</div>
+          <div class="phone-avatar"><img src="./WhatsApp Image 2026-06-08 at 12.47.33 PM.jpeg" alt="Doctor"></div>
+          <div style="color:white; font-weight:700;">Dr. Reshma</div>
+          <div style="color:rgba(255,255,255,0.6); font-size:13px;">Cardiologist</div>
+          <div class="phone-controls">
+            <div class="phone-btn gray">🎤</div>
+            <div class="phone-btn red">📵</div>
+            <div class="phone-btn gray">📷</div>
+          </div>
+        </div>
+      </div>
+      <div class="floating-notif n1 float-delay">
+        <div class="notif-title">📋 Prescription Sent</div>
+        <div class="notif-sub">To your pharmacy · 2 min ago</div>
+      </div>
+      <div class="floating-notif n2 float-delay2">
+        <div class="notif-title">📅 Follow-up Scheduled</div>
+        <div class="notif-sub">Dec 28 at 3:00 PM</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WELLNESS PROGRAMS -->
+<section class="wellness section">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label reveal">Wellness Hub</div>
+    <h2 class="section-title reveal" style="color:var(--deep);">Whole-Person <span>Wellness</span></h2>
+  </div>
+  <div class="grid-2 stagger-parent">
+    <div class="wellness-card stagger-child"><div class="wellness-icon">🏃‍♂️</div><div><h3>Fitness & Rehabilitation</h3><p>Certified exercise physiologists design personalized programs for post-surgery recovery, chronic conditions, and general fitness optimization.</p></div></div>
+    <div class="wellness-card stagger-child"><div class="wellness-icon">🥗</div><div><h3>Nutrition & Dietetics</h3><p>Evidence-based dietary plans from registered dietitians addressing weight management, food allergies, and disease-specific nutrition.</p></div></div>
+    <div class="wellness-card stagger-child"><div class="wellness-icon">🧘</div><div><h3>Mindfulness & Stress Reduction</h3><p>MBSR (Mindfulness-Based Stress Reduction) programs with certified instructors — available in-person and online.</p></div></div>
+    <div class="wellness-card stagger-child"><div class="wellness-icon">😴</div><div><h3>Sleep Medicine</h3><p>Comprehensive sleep studies, CPAP optimization, and cognitive behavioral therapy for insomnia (CBT-I).</p></div></div>
+    <div class="wellness-card stagger-child"><div class="wellness-icon">💪</div><div><h3>Weight Management</h3><p>Medical weight loss programs including behavioral therapy, medication support, and bariatric surgery consultation.</p></div></div>
+    <div class="wellness-card stagger-child"><div class="wellness-icon">🚭</div><div><h3>Smoking Cessation</h3><p>Proven quit programs combining counseling, nicotine replacement therapy, and medication management.</p></div></div>
+  </div>
+</section>
+
+<!-- EMERGENCY -->
+<section class="emergency">
+  <h2 class="reveal">Medical Emergency?</h2>
+  <p class="reveal">Our Level I Trauma Center is staffed 24 hours a day, 365 days a year.</p>
+  <div class="emergency-num reveal">🚨 1-800-MEDICORE</div>
+  <div style="margin-top:40px; display:flex; gap:20px; justify-content:center;" class="reveal">
+    <a href="contact.html" class="btn-primary" style="background:white; color:#dc2626;">Find Nearest Location</a>
+    <a href="tel:911" class="btn-outline" style="border-color:rgba(255,255,255,0.5); color:white;">Call 911 Now</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo" style="display:inline-flex;">
+        <img src="logo-stackly.png" alt="Stackly" class="nav-logo-img" style="filter:brightness(0) invert(1);height:36px;">
+      </a>
+      <p>Transforming healthcare through innovation, compassion, and clinical excellence. Your health is our highest priority.</p>
+      <div style="margin-top:20px; display:flex; gap:12px;">
+        <div style="margin-top:20px; display:flex; gap:12px;">
+          <!-- X (Twitter) -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
+            </svg>
+          </a>
+
+          <!-- Facebook -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+
+          <!-- LinkedIn -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </a>
+
+          <!-- YouTube -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0.0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="care.html">Care Programs</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Specialties</h4>
+      <ul>
+        <li><a href="#">Cardiology</a></li>
+        <li><a href="#">Neurology</a></li>
+        <li><a href="#">Oncology</a></li>
+        <li><a href="#">Orthopedics</a></li>
+        <li><a href="#">Pediatrics</a></li>
+        <li><a href="#">Emergency</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#">📍 MMR Complex,Salem,Tamil Nadu,636 008.</a></li>
+        <li><a href="tel:+919876543210">📞 +91 9876543210</a></li>
+        <li><a href="mailto:care@stackly.com">✉️ care@stackly.com</a></li>
+        <li><a href="#">🕐 Mon–Fri: 7AM–8PM</a></li>
+        <li><a href="#">🚨 Emergency: 24/7</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 STACKLY Health Systems. All rights reserved.</span>
+    <div style="display:flex; gap:24px;">
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">Privacy Policy</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">Terms of Service</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">HIPAA Notice</a>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

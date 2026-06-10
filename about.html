@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — STACKLY Healthcare</title>
+<link rel="stylesheet" href="main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+
+
+/*NAVBAR */
+nav.navbar{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:500!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 5%!important;height:72px!important;background:var(--deep2)!important;backdrop-filter:blur(12px)!important;border-bottom:1px solid rgba(255,255,255,0.07)!important;box-sizing:border-box!important;}
+nav.navbar a.nav-logo{display:flex!important;align-items:center!important;text-decoration:none!important;}
+nav.navbar img.nav-logo-img{height:36px!important;width:auto!important;object-fit:contain!important;filter:brightness(0) invert(1)!important;display:block!important;}
+nav.navbar ul.nav-links{display:flex!important;list-style:none!important;gap:32px!important;align-items:center!important;margin:0!important;padding:0!important;flex-wrap:nowrap!important;}
+nav.navbar ul.nav-links li{display:list-item!important;margin:0!important;padding:0!important;}
+nav.navbar ul.nav-links li a.nav-link,
+nav.navbar a.nav-link{color:rgba(255,255,255,0.7)!important;text-decoration:none!important;font-size:14px!important;font-weight:500!important;font-family:'DM Sans',sans-serif!important;transition:color 0.2s!important;white-space:nowrap!important;}
+nav.navbar ul.nav-links li a.nav-link:hover,
+nav.navbar ul.nav-links li a.nav-link.active{color:#14b8a6!important;}
+nav.navbar .nav-cta{display:flex!important;gap:12px!important;align-items:center!important;flex-shrink:0!important;}
+nav.navbar a.btn-outline{padding:9px 20px!important;border:1.5px solid rgba(20,184,166,0.5)!important;border-radius:10px!important;color:#14b8a6!important;font-size:13px!important;font-weight:600!important;text-decoration:none!important;transition:all 0.3s!important;white-space:nowrap!important;background:transparent!important;}
+nav.navbar a.btn-outline:hover{background:rgba(13,148,136,0.1)!important;}
+nav.navbar a.btn-primary{padding:10px 22px!important;background:linear-gradient(135deg,#0d9488,#14b8a6)!important;border-radius:10px!important;color:white!important;font-size:13px!important;font-weight:700!important;text-decoration:none!important;display:inline-flex!important;align-items:center!important;transition:all 0.3s!important;white-space:nowrap!important;border:none!important;}
+nav.navbar a.btn-primary:hover{transform:translateY(-1px)!important;box-shadow:0 6px 20px rgba(13,148,136,0.4)!important;}
+button.nav-toggle{display:none!important;flex-direction:column!important;gap:5px!important;background:none!important;border:none!important;cursor:pointer!important;padding:4px!important;flex-shrink:0!important;}
+button.nav-toggle span{display:block!important;width:22px!important;height:2px!important;background:white!important;border-radius:2px!important;transition:all 0.3s!important;}
+div.mobile-nav{display:none;position:fixed!important;inset:0!important;background:rgba(1,31,30,0.98)!important;z-index:499!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:24px!important;}
+div.mobile-nav.open{display:flex!important;}
+div.mobile-nav a.nav-link{color:white!important;font-size:18px!important;}
+button.mobile-nav-close{position:absolute!important;top:20px!important;right:20px!important;background:none!important;border:none!important;color:white!important;font-size:28px!important;cursor:pointer!important;}
+/* Desktop: always show nav-links; hide hamburger */
+@media(min-width:901px){
+  nav.navbar ul.nav-links{display:flex!important;}
+  nav.navbar .nav-cta{display:flex!important;}
+  button.nav-toggle{display:none!important;}
+}
+/* Mobile: hide nav-links, show hamburger */
+@media(max-width:900px){
+  nav.navbar ul.nav-links{display:none!important;}
+  nav.navbar .nav-cta{display:none!important;}
+  button.nav-toggle{display:flex!important;}
+}
+
+
+.page-hero {
+  color: white;
+  min-height: 60vh;
+  background: var(--deep2);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; position: relative; overflow: hidden; padding-top: 80px;
+}
+.page-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 60%, rgba(13,148,136,0.2) 0%, transparent 70%);
+}
+.page-hero-content { position: relative; z-index: 2; }
+.page-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 7vw, 90px);
+  color: white; font-weight: 900;
+  margin-bottom: 20px;
+}
+.page-hero p { color: rgba(255,255,255,0.65); font-size: 18px; max-width: 600px; margin: 0 auto; }
+.breadcrumb { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 20px; }
+.breadcrumb a { color: var(--teal-light); text-decoration: none; font-size: 14px; }
+.breadcrumb span { color: rgba(255,255,255,0.4); font-size: 14px; }
+
+/* MISSION */
+.mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.mission-visual { position: relative; height: 540px; }
+.mission-img-1 { position: absolute; top: 0; right: 0; width: 80%; height: 420px; border-radius: 30px; overflow: hidden; }
+.mission-img-1 img { width:100%; height:100%; object-fit:cover; }
+.mission-img-2 { position: absolute; bottom: 0; left: 0; width: 50%; height: 260px; border-radius: 24px; overflow: hidden; border: 4px solid white; box-shadow: var(--shadow); }
+.mission-img-2 img { width:100%; height:100%; object-fit:cover; }
+.mission-badge { position: absolute; top: 30px; left: 0; z-index: 10; background: var(--teal); color: white; padding: 16px 24px; border-radius: 16px; text-align: center; box-shadow: var(--shadow); }
+.mission-badge .num { font-family:'Playfair Display',serif; font-size: 32px; font-weight:900; }
+.mission-badge .lbl { font-size: 12px; opacity: 0.85; }
+
+/* VALUES */
+.values { background: var(--white); }
+.value-card { background: white; border-radius: 24px; padding: 40px 32px; border: 1px solid var(--border); text-align: center; transition: all 0.4s; }
+.value-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-lg); }
+.value-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+.value-card h3 { font-size: 20px; font-weight: 700; color: var(--deep); margin-bottom: 12px; }
+.value-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* TEAM */
+.team-section { background: #f8fffe; }
+.team-card { background: white; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); transition: all 0.4s; }
+.team-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+.team-img { height: 320px; overflow: hidden; }
+.team-img img { width:100%; height:100%; object-fit: cover; transition: transform 0.5s; }
+.team-card:hover .team-img img { transform: scale(1.05); }
+.team-info { padding: 28px; }
+.team-info h3 { font-size: 20px; font-weight: 700; color: var(--deep); margin-bottom: 4px; }
+.team-info .role { font-size: 13px; color: var(--teal); font-weight: 600; margin-bottom: 12px; }
+.team-info p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.team-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* TIMELINE */
+.timeline { background: linear-gradient(135deg, var(--deep), var(--deep2)); padding: 100px 5%; }
+.timeline h2 { color: white; text-align: center; }
+.timeline-items { position: relative; max-width: 900px; margin: 60px auto 0; }
+.timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(13,148,136,0.4); transform: translateX(-50%); }
+.timeline-item { display: grid; grid-template-columns: 1fr auto 1fr; gap: 30px; align-items: center; margin-bottom: 60px; }
+.timeline-content-left { text-align: right; }
+.timeline-content-right { text-align: left; }
+.timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--teal); border: 3px solid rgba(13,148,136,0.3); position: relative; z-index: 1; flex-shrink: 0; }
+.timeline-year { font-family:'Playfair Display',serif; font-size: 28px; font-weight: 900; color: var(--teal-light); }
+.timeline-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 6px; }
+.timeline-desc { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+/* AWARDS */
+.awards { background: white; }
+.award-card { background: var(--white); border-radius: 20px; padding: 32px; border: 1px solid var(--border); text-align: center; transition: all 0.4s; }
+.award-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.award-icon { font-size: 40px; margin-bottom: 16px; }
+.award-card h4 { font-size: 16px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
+.award-card p { font-size: 13px; color: var(--muted); }
+.award-card .year { font-size: 12px; color: var(--teal); font-weight: 700; margin-top: 12px; display: block; }
+
+/* PARTNERS */
+.partners { background: var(--white); padding: 60px 5%; text-align: center; }
+.partners h3 { font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 40px; }
+.partner-logos { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 40px; }
+.partner-logo { font-family:'Playfair Display',serif; font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.2); transition: color 0.3s; cursor: default; }
+.partner-logo:hover { color: var(--teal); }
+</style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <img src="logo-stackly.png" alt="Stackly" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Home</a></li>
+    <li><a href="about.html" class="nav-link active">About</a></li>
+    <li><a href="services.html" class="nav-link">Services</a></li>
+    <li><a href="care.html" class="nav-link">Care</a></li>
+    <li><a href="blog.html" class="nav-link">Blog</a></li>
+    <li><a href="contact.html" class="nav-link">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-outline">Login</a>
+    <a href="contact.html" class="btn-primary">Book Appointment ✦</a>
+  </div>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="nav-link">Home</a>
+  <a href="about.html" class="nav-link active">About</a>
+  <a href="services.html" class="nav-link">Services</a>
+  <a href="care.html" class="nav-link">Care</a>
+  <a href="blog.html" class="nav-link">Blog</a>
+  <a href="contact.html" class="nav-link">Contact</a>
+  <a href="login.html" class="btn-primary" style="margin-top:16px">Login</a>
+</div>
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-content">
+    <div class="breadcrumb reveal">
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <span style="color:white">About</span>
+    </div>
+    <h1 class="reveal">Our <span style="color:var(--teal-light)">Story</span></h1>
+    <p class="reveal">Pioneering compassionate care and clinical excellence since 1999</p>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="section" style="background:white;">
+  <div class="mission-grid">
+    <div class="mission-visual reveal">
+      <div class="mission-img-1">
+        <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=1600&q=90" alt="Hospital Interior" class="img-zoom">
+      </div>
+      <div class="mission-img-2">
+        <img src="https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=800&q=90" alt="Medical Team" class="img-zoom">
+      </div>
+      <div class="mission-badge float">
+        <div class="num">JCI</div>
+        <div class="lbl">Accredited<br>Facility</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label reveal">Our Mission</div>
+      <h2 class="section-title reveal">We Exist to <span>Heal, Innovate,</span> and Inspire</h2>
+      <p class="section-subtitle reveal">
+        Founded by Dr. Edwin Park in 1999, MediCore began as a 12-bed clinic with a singular mission: give every patient access to world-class care regardless of their background or means. Today, we operate one of the largest multi-specialty hospital networks in the region.
+      </p>
+      <p style="font-size:15px; color:var(--muted); line-height:1.8; margin-top:20px;" class="reveal">
+        Our philosophy is simple — great medicine requires both clinical mastery and human connection. We invest equally in our physicians, our technology, and our culture of kindness.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:40px;" class="reveal">
+        <div style="padding:24px; background:var(--white); border-radius:16px; border:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--teal);">500+</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px;">Medical Staff</div>
+        </div>
+        <div style="padding:24px; background:var(--white); border-radius:16px; border:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--teal);">48</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px;">Specialties Covered</div>
+        </div>
+        <div style="padding:24px; background:var(--white); border-radius:16px; border:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--teal);">6</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px;">Hospital Campuses</div>
+        </div>
+        <div style="padding:24px; background:var(--white); border-radius:16px; border:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--teal);">120+</div>
+          <div style="font-size:14px; color:var(--muted); margin-top:4px;">Research Projects</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values section">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label reveal">Our Core Values</div>
+    <h2 class="section-title reveal">What Drives Everything <span>We Do</span></h2>
+  </div>
+  <div class="grid-4 stagger-parent">
+    <div class="value-card stagger-child">
+      <span class="value-icon">❤️</span>
+      <h3>Compassion First</h3>
+      <p>Every patient deserves to feel seen, heard, and cared for as a whole person — not just a diagnosis.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🔬</span>
+      <h3>Scientific Rigor</h3>
+      <p>Every treatment we offer is grounded in the best available evidence and continuously evaluated for efficacy.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🤝</span>
+      <h3>Radical Transparency</h3>
+      <p>We communicate openly about diagnosis, prognosis, and options — empowering patients to make informed choices.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🌍</span>
+      <h3>Inclusive Care</h3>
+      <p>Exceptional healthcare is a right, not a privilege. We work to eliminate barriers across every demographic.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🚀</span>
+      <h3>Continuous Innovation</h3>
+      <p>We actively invest in emerging technologies, clinical research, and new treatment modalities.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🛡️</span>
+      <h3>Patient Safety</h3>
+      <p>Zero-harm protocols, double-verification systems, and culture of safety accountability at every level.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">🌱</span>
+      <h3>Sustainability</h3>
+      <p>Carbon-neutral operations by 2028. We care for the planet as much as our patients.</p>
+    </div>
+    <div class="value-card stagger-child">
+      <span class="value-icon">👨‍👩‍👧‍👦</span>
+      <h3>Community Rooted</h3>
+      <p>Investing back into local communities through free clinics, health education, and scholarship programs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team-section section">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label reveal">Leadership</div>
+    <h2 class="section-title reveal">The Minds Behind <span>MediCore</span></h2>
+    <p class="section-subtitle reveal" style="margin:0 auto; text-align:center;">Our leadership team brings together decades of clinical, research, and administrative excellence.</p>
+  </div>
+  <div class="grid-4 stagger-parent">
+    <div class="team-card stagger-child">
+      <div class="team-img"><img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800&q=90" alt="CEO"></div>
+      <div class="team-info">
+        <h3>Dr. Edwin Park</h3>
+        <div class="role">Founder & CEO</div>
+        <p>Stanford-trained cardiologist with 35+ years of clinical and executive leadership experience.</p>
+        <div class="team-tags">
+          <span class="tag">Cardiology</span>
+          <span class="tag">Leadership</span>
+        </div>
+      </div>
+    </div>
+    <div class="team-card stagger-child">
+      <div class="team-img"><img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800&q=90" alt="CMO"></div>
+      <div class="team-info">
+        <h3>Dr. Angela Rivera</h3>
+        <div class="role">Chief Medical Officer</div>
+        <p>Former WHO consultant. Champion of evidence-based practice and clinical quality standards.</p>
+        <div class="team-tags">
+          <span class="tag">Internal Medicine</span>
+          <span class="tag">Policy</span>
+        </div>
+      </div>
+    </div>
+    <div class="team-card stagger-child">
+      <div class="team-img"><img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=800&q=90" alt="CTO"></div>
+      <div class="team-info">
+        <h3>Dr. Marcus Lee</h3>
+        <div class="role">Chief of Surgery</div>
+        <p>Pioneer in robotic surgical techniques with over 4,000 successful complex procedures.</p>
+        <div class="team-tags">
+          <span class="tag">Robotic Surgery</span>
+          <span class="tag">Innovation</span>
+        </div>
+      </div>
+    </div>
+    <div class="team-card stagger-child">
+      <div class="team-img"><img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&q=90" alt="CNO"></div>
+      <div class="team-info">
+        <h3>Dr. Sophia Nakamura</h3>
+        <div class="role">Chief Nursing Officer</div>
+        <p>Transforming patient experience through compassionate nursing leadership and team culture.</p>
+        <div class="team-tags">
+          <span class="tag">Patient Care</span>
+          <span class="tag">Operations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline section">
+  <div class="section-label reveal" style="justify-content:center; color:var(--teal-light);">Our Journey</div>
+  <h2 class="section-title reveal" style="text-align:center; color:white;">25 Years of <span>Milestones</span></h2>
+  <div class="timeline-items">
+    <div class="timeline-line"></div>
+    <div class="timeline-item reveal">
+      <div class="timeline-content-left">
+        <div class="timeline-year">1999</div>
+        <div class="timeline-title">Founding</div>
+        <div class="timeline-desc">Dr. Edwin Park opens MediCore Clinic with 12 beds and 8 staff members in downtown.</div>
+      </div>
+      <div class="timeline-dot"></div>
+      <div></div>
+    </div>
+    <div class="timeline-item reveal">
+      <div></div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content-right">
+        <div class="timeline-year">2004</div>
+        <div class="timeline-title">First Hospital</div>
+        <div class="timeline-desc">Opened our first full-service hospital with 150 beds and 8 specialty departments.</div>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-content-left">
+        <div class="timeline-year">2010</div>
+        <div class="timeline-title">Research Center</div>
+        <div class="timeline-desc">Launched the MediCore Research Institute, conducting 20+ active clinical trials annually.</div>
+      </div>
+      <div class="timeline-dot"></div>
+      <div></div>
+    </div>
+    <div class="timeline-item reveal">
+      <div></div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content-right">
+        <div class="timeline-year">2016</div>
+        <div class="timeline-title">JCI Accreditation</div>
+        <div class="timeline-desc">Achieved Joint Commission International accreditation — first in our region.</div>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-content-left">
+        <div class="timeline-year">2021</div>
+        <div class="timeline-title">Digital Transformation</div>
+        <div class="timeline-desc">Launched AI-powered diagnostics platform and telehealth system serving 100,000+ patients.</div>
+      </div>
+      <div class="timeline-dot"></div>
+      <div></div>
+    </div>
+    <div class="timeline-item reveal">
+      <div></div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content-right">
+        <div class="timeline-year">2025</div>
+        <div class="timeline-title">MediCore 2.0</div>
+        <div class="timeline-desc">Expansion to 6 campuses, genomic medicine center, and 50,000-patient milestone.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section class="awards section">
+  <div style="text-align:center; margin-bottom:60px;">
+    <div class="section-label reveal">Recognition</div>
+    <h2 class="section-title reveal">Awards & <span>Accreditations</span></h2>
+  </div>
+  <div class="grid-4 stagger-parent">
+    <div class="award-card stagger-child">
+      <div class="award-icon">🏆</div>
+      <h4>Best Hospital Award</h4>
+      <p>National Healthcare Excellence Awards — Top 10 Hospitals Nationally</p>
+      <span class="year">2024</span>
+    </div>
+    <div class="award-card stagger-child">
+      <div class="award-icon">🎖️</div>
+      <h4>JCI Accreditation</h4>
+      <p>Joint Commission International — Gold Seal of Approval</p>
+      <span class="year">2016, 2020, 2024</span>
+    </div>
+    <div class="award-card stagger-child">
+      <div class="award-icon">⭐</div>
+      <h4>5-Star Patient Rating</h4>
+      <p>CMS Five-Star Quality Rating for Patient Experience</p>
+      <span class="year">6 Consecutive Years</span>
+    </div>
+    <div class="award-card stagger-child">
+      <div class="award-icon">🔬</div>
+      <h4>Research Excellence</h4>
+      <p>NIH Research Center of Excellence Designation</p>
+      <span class="year">2023</span>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<div class="partners">
+  <h3>Trusted Partners & Affiliates</h3>
+  <div class="partner-logos">
+    <span class="partner-logo">MayoClinic</span>
+    <span class="partner-logo">Johns Hopkins</span>
+    <span class="partner-logo">Stanford Health</span>
+    <span class="partner-logo">WHO</span>
+    <span class="partner-logo">NIH</span>
+    <span class="partner-logo">Harvard Med</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo" style="display:inline-flex;">
+        <img src="logo-stackly.png" alt="Stackly" class="nav-logo-img" style="filter:brightness(0) invert(1);height:36px;">
+      </a>
+      <p>Transforming healthcare through innovation, compassion, and clinical excellence. Your health is our highest priority.</p>
+      <div style="margin-top:20px; display:flex; gap:12px;">
+        <div style="margin-top:20px; display:flex; gap:12px;">
+        <!-- X (Twitter) -->
+        <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
+          </svg>
+        </a>
+
+        <!-- Facebook -->
+        <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+
+        <!-- YouTube -->
+        <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0.0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </a>
+      </div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="care.html">Care Programs</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Specialties</h4>
+      <ul>
+        <li><a href="#">Cardiology</a></li>
+        <li><a href="#">Neurology</a></li>
+        <li><a href="#">Oncology</a></li>
+        <li><a href="#">Orthopedics</a></li>
+        <li><a href="#">Pediatrics</a></li>
+        <li><a href="#">Emergency</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#">📍 MMR Complex,Salem,Tamil Nadu,636 008.</a></li>
+        <li><a href="tel:+919876543210">📞 +91 9876543210</a></li>
+        <li><a href="mailto:care@stackly.com">✉️ care@stackly.com</a></li>
+        <li><a href="#">🕐 Mon–Fri: 7AM–8PM</a></li>
+        <li><a href="#">🚨 Emergency: 24/7</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 STACKLY Health Systems. All rights reserved.</span>
+    <div style="display:flex; gap:24px;">
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">Privacy Policy</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">Terms of Service</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px;">HIPAA Notice</a>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

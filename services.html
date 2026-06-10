@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — STACKLY Healthcare</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+/* ── CSS VARIABLES ── */
+:root{
+  --teal:#0d9488;
+  --teal-light:#14b8a6;
+  --teal-dark:#042f2e;
+  --deep:#011f1e;
+  --deep2:#0a1628;        /* ← deep2: very dark navy, distinct from --deep */
+  --muted:#6b7280;
+  --text:#374151;
+  --border:rgba(0,0,0,0.08);
+  --white:#ffffff;
+  --mint:rgba(13,148,136,0.1);
+  --gold:#f59e0b;
+  --shadow:0 8px 40px rgba(0,0,0,0.08);
+  --shadow-lg:0 20px 60px rgba(0,0,0,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:#f8fffe;color:var(--text);overflow-x:hidden;}
+
+/* ══ NAVBAR — fully self-contained, immune to main.css ══ */
+nav.navbar{
+  position:fixed!important;top:0!important;left:0!important;right:0!important;
+  z-index:500!important;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;padding:0 5%!important;height:72px!important;
+  background:var(--deep2)!important;
+  backdrop-filter:blur(12px)!important;
+  border-bottom:1px solid rgba(255,255,255,0.07)!important;
+  box-sizing:border-box!important;
+}
+nav.navbar a.nav-logo{display:flex!important;align-items:center!important;text-decoration:none!important;}
+nav.navbar img.nav-logo-img{height:36px!important;width:auto!important;object-fit:contain!important;filter:brightness(0) invert(1)!important;display:block!important;}
+nav.navbar ul.nav-links{
+  display:flex!important;list-style:none!important;gap:32px!important;
+  align-items:center!important;margin:0!important;padding:0!important;flex-wrap:nowrap!important;
+}
+nav.navbar ul.nav-links li{display:list-item!important;margin:0!important;padding:0!important;}
+nav.navbar ul.nav-links li a.nav-link,
+nav.navbar a.nav-link{
+  color:rgba(255,255,255,0.75)!important;text-decoration:none!important;
+  font-size:14px!important;font-weight:500!important;
+  font-family:'DM Sans',sans-serif!important;transition:color 0.2s!important;white-space:nowrap!important;
+}
+nav.navbar ul.nav-links li a.nav-link:hover,
+nav.navbar ul.nav-links li a.nav-link.active{color:#14b8a6!important;}
+nav.navbar .nav-cta{display:flex!important;gap:12px!important;align-items:center!important;flex-shrink:0!important;}
+nav.navbar a.btn-outline{
+  padding:9px 20px!important;border:1.5px solid rgba(20,184,166,0.5)!important;
+  border-radius:10px!important;color:#14b8a6!important;font-size:13px!important;
+  font-weight:600!important;text-decoration:none!important;transition:all 0.3s!important;
+  white-space:nowrap!important;background:transparent!important;
+}
+nav.navbar a.btn-outline:hover{background:rgba(13,148,136,0.12)!important;}
+nav.navbar a.btn-primary{
+  padding:10px 22px!important;
+  background:linear-gradient(135deg,#0d9488,#14b8a6)!important;
+  border-radius:10px!important;color:white!important;font-size:13px!important;
+  font-weight:700!important;text-decoration:none!important;display:inline-flex!important;
+  align-items:center!important;transition:all 0.3s!important;
+  white-space:nowrap!important;border:none!important;
+}
+nav.navbar a.btn-primary:hover{transform:translateY(-1px)!important;box-shadow:0 6px 20px rgba(13,148,136,0.4)!important;}
+button.nav-toggle{
+  display:none!important;flex-direction:column!important;gap:5px!important;
+  background:none!important;border:none!important;cursor:pointer!important;
+  padding:4px!important;flex-shrink:0!important;
+}
+button.nav-toggle span{display:block!important;width:22px!important;height:2px!important;background:white!important;border-radius:2px!important;transition:all 0.3s!important;}
+button.nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)!important;}
+button.nav-toggle.open span:nth-child(2){opacity:0!important;transform:scaleX(0)!important;}
+button.nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)!important;}
+div.mobile-nav{
+  display:none;position:fixed!important;inset:0!important;
+  background:rgba(10,22,40,0.98)!important;
+  z-index:499!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;gap:24px!important;
+}
+div.mobile-nav.open{display:flex!important;}
+div.mobile-nav a.nav-link{color:rgba(255,255,255,0.85)!important;font-size:18px!important;font-weight:500!important;}
+div.mobile-nav a.nav-link:hover{color:#14b8a6!important;}
+button.mobile-nav-close{
+  position:absolute!important;top:20px!important;right:20px!important;
+  background:none!important;border:none!important;color:white!important;
+  font-size:28px!important;cursor:pointer!important;opacity:0.7!important;
+}
+button.mobile-nav-close:hover{opacity:1!important;}
+@media(min-width:901px){
+  nav.navbar ul.nav-links{display:flex!important;}
+  nav.navbar .nav-cta{display:flex!important;}
+  button.nav-toggle{display:none!important;}
+}
+@media(max-width:900px){
+  nav.navbar ul.nav-links{display:none!important;}
+  nav.navbar .nav-cta{display:none!important;}
+  button.nav-toggle{display:flex!important;}
+}
+
+/* ══ PAGE HERO ══ */
+.page-hero{
+  min-height:64vh;
+  background:linear-gradient(135deg,var(--deep2) 0%,#0f1f35 55%,#1a3050 100%);
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;padding-top:72px;
+  position:relative;overflow:hidden;color:white;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 65%,rgba(13,148,136,0.18) 0%,transparent 70%);
+}
+.page-hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(13,148,136,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(13,148,136,0.04) 1px,transparent 1px);
+  background-size:50px 50px;
+}
+.page-hero-content{position:relative;z-index:2;padding:60px 5% 80px;width:100%;}
+
+/* Hero badge */
+.hero-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(13,148,136,0.15);
+  border:1px solid rgba(20,184,166,0.35);
+  color:#7ec8c8;padding:8px 22px;border-radius:50px;
+  font-size:13px;font-weight:600;margin-bottom:28px;
+  animation:badgeFadeIn 0.6s ease forwards;
+}
+@keyframes badgeFadeIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+.badge-pulse{
+  width:7px;height:7px;background:#14b8a6;
+  border-radius:50%;animation:bpulse 1.6s ease-out infinite;
+}
+@keyframes bpulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.8);opacity:.3;}}
+
+/* Breadcrumb */
+.breadcrumb{
+  display:flex;align-items:center;gap:8px;
+  justify-content:center;margin-bottom:20px;
+  animation:fadeUp 0.5s ease forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.breadcrumb a{color:#14b8a6;text-decoration:none;font-size:14px;font-weight:500;}
+.breadcrumb a:hover{color:white;}
+.breadcrumb span{color:rgba(255,255,255,0.35);font-size:14px;}
+
+/* Hero title */
+.page-hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(44px,7vw,84px);
+  color:white;font-weight:900;line-height:1.06;margin-bottom:20px;
+  animation:fadeUp 0.6s 0.1s ease both;
+}
+.page-hero h1 .accent{color:#14b8a6;font-style:italic;}
+
+/* Hero subtitle */
+.page-hero p.hero-sub{
+  color:rgba(255,255,255,0.62);font-size:18px;
+  max-width:560px;margin:0 auto 40px;line-height:1.7;
+  animation:fadeUp 0.6s 0.2s ease both;
+}
+
+/* ── HERO CHIPS ── */
+.hero-chips{
+  display:flex;justify-content:center;gap:16px;flex-wrap:wrap;
+  animation:fadeUp 0.6s 0.3s ease both;
+}
+.hero-chip{
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:16px;padding:16px 24px;
+  text-align:center;min-width:110px;
+  backdrop-filter:blur(8px);
+  transition:all 0.3s;
+}
+.hero-chip:hover{
+  background:rgba(13,148,136,0.2);
+  border-color:rgba(20,184,166,0.4);
+  transform:translateY(-3px);
+}
+.hc-num{
+  display:block;
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:900;color:white;line-height:1.1;
+}
+.hc-accent{color:#14b8a6;}
+.hc-lbl{
+  display:block;font-size:11px;
+  color:rgba(255,255,255,0.5);
+  text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;
+}
+
+/* ── SERVICE NAV TABS ── */
+.service-nav{
+  background:white;
+  border-bottom:2px solid var(--border);
+  padding:0 5%;
+  position:sticky;top:72px;z-index:200;
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+.service-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;}
+.service-tabs::-webkit-scrollbar{display:none;}
+.service-tab{
+  padding:18px 24px;font-size:14px;font-weight:600;color:var(--muted);
+  border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:all 0.25s;display:flex;align-items:center;gap:8px;
+  user-select:none;
+}
+.service-tab:hover{color:var(--teal);background:rgba(13,148,136,0.04);}
+.service-tab.active{color:var(--teal);border-bottom-color:var(--teal);background:rgba(13,148,136,0.05);}
+.tab-count{
+  background:var(--mint);color:var(--teal);
+  font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;
+  transition:all 0.25s;
+}
+.service-tab.active .tab-count{background:var(--teal);color:white;}
+
+/* FILTER BAR */
+.filter-bar{
+  background:linear-gradient(90deg,rgba(13,148,136,0.06),rgba(13,148,136,0.02));
+  border-bottom:1px solid rgba(13,148,136,0.1);
+  padding:12px 5%;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.filter-info{font-size:14px;color:var(--muted);}
+.filter-info strong{color:var(--deep);font-weight:700;}
+.filter-clear{
+  color:var(--teal);font-size:13px;font-weight:600;
+  cursor:pointer;border:none;background:none;
+  font-family:'DM Sans',sans-serif;display:none;
+  padding:6px 12px;border-radius:8px;transition:background 0.2s;
+}
+.filter-clear:hover{background:rgba(13,148,136,0.1);}
+.filter-clear.visible{display:block;}
+
+/* SECTION */
+.section{padding:80px 5%;}
+.section-label{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;color:var(--deep);line-height:1.1;margin-bottom:16px;}
+.section-title span{color:var(--teal);}
+.section-subtitle{font-size:16px;color:var(--muted);line-height:1.7;max-width:560px;}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:var(--mint);color:var(--teal);border-radius:50px;font-size:12px;font-weight:700;}
+
+/* ── GLOBAL BUTTONS (outside navbar) ── */
+.btn-primary{
+  display:inline-flex;align-items:center;
+  padding:11px 24px;background:linear-gradient(135deg,#0d9488,#14b8a6);
+  border-radius:10px;color:white;font-size:14px;font-weight:700;
+  text-decoration:none;border:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.3s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,148,136,0.4);}
+.btn-outline{
+  display:inline-flex;align-items:center;
+  padding:11px 24px;border:1.5px solid rgba(13,148,136,0.4);
+  border-radius:10px;color:var(--teal);font-size:14px;font-weight:600;
+  text-decoration:none;background:transparent;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.3s;
+}
+.btn-outline:hover{background:var(--teal);border-color:var(--teal);}
+
+/* ── SERVICE CARDS ── */
+.services-container{background:white;}
+.service-big-card{
+  background:white;border-radius:28px;overflow:hidden;
+  margin:0 5% 40px;
+  box-shadow:0 4px 30px rgba(0,0,0,0.06);
+  border:1px solid var(--border);
+  display:grid;grid-template-columns:1fr 1fr;
+  transition:transform 0.4s,box-shadow 0.4s;
+}
+.service-big-card:first-child{margin-top:60px;}
+.service-big-card:last-child{margin-bottom:60px;}
+.service-big-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);}
+.service-big-card.alt{direction:rtl;}
+.service-big-card.alt>*{direction:ltr;}
+.service-big-card.hidden{display:none;}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.service-big-card.fade-in{animation:fadeSlideIn 0.4s ease both;}
+
+.s-img{height:420px;overflow:hidden;position:relative;}
+.s-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s;}
+.service-big-card:hover .s-img img{transform:scale(1.05);}
+.s-img-overlay{
+  position:absolute;bottom:0;left:0;right:0;height:40%;
+  background:linear-gradient(0deg,rgba(1,31,30,0.5),transparent);
+  pointer-events:none;
+}
+.s-info{padding:52px 48px;display:flex;flex-direction:column;justify-content:center;}
+.s-info .tag{margin-bottom:16px;width:fit-content;}
+.s-info h2{font-family:'Playfair Display',serif;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:var(--deep);margin-bottom:12px;line-height:1.25;}
+.s-info p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+.s-features{list-style:none;margin-bottom:22px;}
+.s-features li{
+  display:flex;align-items:center;gap:10px;font-size:14px;
+  color:var(--deep);padding:7px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.s-features li:last-child{border-bottom:none;}
+.s-features li::before{content:'✦';color:var(--teal);font-size:10px;flex-shrink:0;}
+.s-meta{
+  display:flex;gap:0;margin-bottom:26px;
+  background:#f8fffe;border-radius:14px;
+  border:1px solid rgba(13,148,136,0.1);
+  overflow:hidden;
+}
+.s-meta-item{
+  text-align:center;flex:1;padding:14px 8px;
+  border-right:1px solid rgba(13,148,136,0.1);
+}
+.s-meta-item:last-child{border-right:none;}
+.s-meta-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--teal);}
+.s-meta-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;}
+
+/* EMPTY STATE */
+.empty-state{padding:80px 5%;text-align:center;display:none;background:white;}
+.empty-state.visible{display:block;}
+.empty-icon{font-size:60px;margin-bottom:16px;}
+.empty-state h3{font-family:'Playfair Display',serif;font-size:24px;color:var(--deep);margin-bottom:8px;}
+.empty-state p{color:var(--muted);font-size:15px;}
+
+/* ── PROCEDURE CARDS ── */
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.proc-card{
+  background:white;border-radius:20px;padding:28px 22px;
+  border:1px solid var(--border);transition:all 0.35s;
+  position:relative;overflow:hidden;
+}
+.proc-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(13,148,136,0.05),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.proc-card:hover::before{opacity:1;}
+.proc-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:rgba(13,148,136,0.2);}
+.proc-icon{font-size:36px;margin-bottom:12px;display:block;}
+.proc-card h3{font-size:15px;font-weight:700;color:var(--deep);margin-bottom:7px;line-height:1.3;}
+.proc-card p{font-size:13px;color:var(--muted);line-height:1.7;}
+.proc-duration{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--teal);font-weight:700;
+  margin-top:12px;background:var(--mint);padding:4px 10px;border-radius:50px;
+}
+.proc-dept{
+  position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;color:var(--muted);
+  background:#f0f4f8;padding:3px 8px;border-radius:20px;
+}
+
+/* ── PRICING CARDS ── */
+.price-card{
+  background:white;border-radius:24px;padding:40px 32px;
+  border:1px solid var(--border);text-align:center;
+  transition:all 0.4s;position:relative;
+}
+.price-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);}
+/* featured uses --deep2 (dark navy) */
+.price-card.featured{
+  background:var(--deep2);
+  border-color:transparent;
+}
+.price-badge{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:white;padding:6px 20px;
+  border-radius:50px;font-size:12px;font-weight:700;white-space:nowrap;
+}
+.price-plan{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
+.price-card.featured .price-plan{color:rgba(255,255,255,0.6);}
+.price-card h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--deep);margin-bottom:14px;}
+.price-card.featured h3{color:white;}
+.price-amount{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--teal);line-height:1;}
+.price-card.featured .price-amount{color:white;}
+.price-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.price-card.featured .price-sub{color:rgba(255,255,255,0.55);}
+.price-features{list-style:none;margin-bottom:28px;text-align:left;}
+.price-features li{
+  padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06);
+  font-size:14px;color:var(--text);
+  display:flex;align-items:center;gap:10px;
+}
+.price-card.featured .price-features li{
+  border-bottom-color:rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.85);
+}
+.price-features li::before{content:'✓';color:var(--teal);font-weight:900;flex-shrink:0;}
+.price-card.featured .price-features li::before{color:#14b8a6;}
+
+/* ── FOOTER ── */
+.footer{background:var(--deep2);color:rgba(255,255,255,0.6);padding:80px 5% 32px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px;}
+.footer-brand p{font-size:14px;line-height:1.8;margin-top:16px;max-width:280px;}
+.footer-col h4{color:white;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col ul li a{color:rgba(255,255,255,0.55);text-decoration:none;font-size:14px;transition:color 0.2s;}
+.footer-col ul li a:hover{color:#14b8a6;}
+.footer-bottom{
+  border-top:1px solid rgba(255,255,255,0.08);padding-top:24px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;flex-wrap:wrap;gap:12px;
+}
+
+/* GRID HELPERS */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){
+  .proc-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:1024px){
+  .service-big-card{grid-template-columns:1fr;}
+  .service-big-card.alt{direction:ltr;}
+  .s-img{height:280px;}
+  .s-info{padding:36px 32px;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+  .proc-grid{grid-template-columns:repeat(2,1fr);}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .hero-chips{gap:12px;}
+  .hero-chip{min-width:90px;padding:14px 16px;}
+  .hc-num{font-size:24px;}
+}
+@media(max-width:900px){
+  .service-nav{top:72px;}
+  .grid-3{grid-template-columns:1fr;}
+  .page-hero h1{font-size:clamp(36px,8vw,56px);}
+}
+@media(max-width:640px){
+  .proc-grid{grid-template-columns:1fr 1fr;}
+  .service-big-card{margin:0 3% 28px;}
+  .s-info{padding:24px 20px;}
+  .s-meta{flex-wrap:wrap;}
+  .section{padding:52px 4%;}
+  .footer-grid{grid-template-columns:1fr;}
+  .hero-chips{gap:8px;}
+  .hero-chip{min-width:80px;padding:12px 12px;}
+  .hc-num{font-size:20px;}
+  .page-hero-content{padding:40px 5% 60px;}
+}
+@media(max-width:400px){
+  .proc-grid{grid-template-columns:1fr;}
+  .service-tab{padding:14px 14px;font-size:12px;}
+  .hero-chips{gap:6px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <img src="logo-stackly.png" alt="Stackly" class="nav-logo-img">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Home</a></li>
+    <li><a href="about.html" class="nav-link">About</a></li>
+    <li><a href="services.html" class="nav-link active">Services</a></li>
+    <li><a href="care.html" class="nav-link">Care</a></li>
+    <li><a href="blog.html" class="nav-link">Blog</a></li>
+    <li><a href="contact.html" class="nav-link">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-outline">Login</a>
+    <a href="contact.html" class="btn-primary">Book Appointment ✦</a>
+  </div>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+  <a href="index.html" class="nav-link">Home</a>
+  <a href="about.html" class="nav-link">About</a>
+  <a href="services.html" class="nav-link active">Services</a>
+  <a href="care.html" class="nav-link">Care</a>
+  <a href="blog.html" class="nav-link">Blog</a>
+  <a href="contact.html" class="nav-link">Contact</a>
+  <a href="login.html" class="btn-primary" style="margin-top:16px">Login</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-content">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a><span>/</span><span style="color:white">Services</span>
+    </div>
+    <div class="hero-badge">
+      <div class="badge-pulse"></div>48 Specialties · World-Class Care
+    </div>
+    <h1>Our <span class="accent">Medical</span><br>Services</h1>
+    <p class="hero-sub">Comprehensive specialty care across 48 departments with world-class technology, expert physicians, and compassionate support.</p>
+    <div class="hero-chips">
+      <div class="hero-chip"><span class="hc-num">48<span class="hc-accent">+</span></span><span class="hc-lbl">Specialties</span></div>
+      <div class="hero-chip"><span class="hc-num">600<span class="hc-accent">+</span></span><span class="hc-lbl">Specialists</span></div>
+      <div class="hero-chip"><span class="hc-num">50k<span class="hc-accent">+</span></span><span class="hc-lbl">Patients/Year</span></div>
+      <div class="hero-chip"><span class="hc-num">98<span class="hc-accent">%</span></span><span class="hc-lbl">Satisfaction</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE TABS -->
+<div class="service-nav" id="serviceNav">
+  <div class="service-tabs">
+    <div class="service-tab active" data-filter="all">All Services <span class="tab-count" id="cnt-all">8</span></div>
+    <div class="service-tab" data-filter="cardiology">❤️ Cardiology <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="neurology">🧠 Neurology <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="oncology">🎗️ Oncology <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="orthopedics">🦴 Orthopedics <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="pediatrics">👶 Pediatrics <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="emergency">🚑 Emergency <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="diagnostics">🔬 Diagnostics <span class="tab-count">1</span></div>
+    <div class="service-tab" data-filter="pulmonology">🫁 Pulmonology <span class="tab-count">1</span></div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-info">Showing <strong id="result-count">8</strong> services</div>
+  <button class="filter-clear" id="filterClear" onclick="filterServices('all')">✕ Clear filter</button>
+</div>
+
+<!-- SERVICE CARDS -->
+<div class="services-container" id="servicesContainer">
+
+  <div class="service-big-card" data-dept="cardiology">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=1200&q=90" alt="Cardiology"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">❤️ Cardiology</span>
+      <h2>Advanced Heart Care Center</h2>
+      <p>Our world-renowned cardiac team handles everything from preventive screenings to complex valve replacements and heart transplants. Equipped with 4 catheterization labs and a 24-hour cardiac ICU.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">4,200+</div><div class="s-meta-lbl">Procedures/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">98%</div><div class="s-meta-lbl">Success Rate</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">42</div><div class="s-meta-lbl">Cardiologists</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Robotic-Assisted Bypass Surgery</li>
+        <li>TAVR (Transcatheter Aortic Valve Replacement)</li>
+        <li>Complex Arrhythmia Ablation</li>
+        <li>Heart Failure & Transplant Program</li>
+        <li>24/7 Cardiac ICU Monitoring</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card alt" data-dept="neurology">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?w=1200&q=90" alt="Neurology"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🧠 Neurology & Neurosurgery</span>
+      <h2>Comprehensive Neuroscience Center</h2>
+      <p>A fully integrated brain and spine program with 24/7 stroke response, intraoperative MRI, and a dedicated neuro-oncology team treating the most challenging neurological conditions.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">2,800+</div><div class="s-meta-lbl">Surgeries/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">96%</div><div class="s-meta-lbl">Success Rate</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">28</div><div class="s-meta-lbl">Neurologists</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Comprehensive Stroke Center (24/7)</li>
+        <li>Brain Tumor Surgery — Awake Craniotomy</li>
+        <li>Epilepsy Monitoring & Surgery</li>
+        <li>Deep Brain Stimulation (DBS)</li>
+        <li>Spinal Cord Injury Rehabilitation</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card" data-dept="oncology">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1576671081837-49000212a370?w=1200&q=90" alt="Oncology"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🎗️ Oncology</span>
+      <h2>Comprehensive Cancer Center</h2>
+      <p>NCI-designated cancer center offering the full spectrum of cancer care — from precision diagnostics to immunotherapy, radiation, surgical oncology, and survivorship programs.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">3,500+</div><div class="s-meta-lbl">Patients/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">94%</div><div class="s-meta-lbl">5-Yr Survival</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">35</div><div class="s-meta-lbl">Oncologists</div></div>
+      </div>
+      <ul class="s-features">
+        <li>CAR-T Cell & Immunotherapy</li>
+        <li>Proton Beam Radiation Therapy</li>
+        <li>Genomic Tumor Profiling</li>
+        <li>Clinical Trial Access (50+ active trials)</li>
+        <li>Palliative & Survivorship Care</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card alt" data-dept="orthopedics">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&q=90" alt="Orthopedics"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🦴 Orthopedics & Sports Medicine</span>
+      <h2>Bone, Joint & Sports Surgery Center</h2>
+      <p>From professional athletes to elderly patients, our orthopedic team delivers cutting-edge joint replacement, arthroscopy, and rehabilitation programs tailored to every lifestyle.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">3,100+</div><div class="s-meta-lbl">Surgeries/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">97%</div><div class="s-meta-lbl">Satisfaction</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">22</div><div class="s-meta-lbl">Specialists</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Robotic-Arm Knee & Hip Replacement</li>
+        <li>ACL / Meniscus Reconstruction</li>
+        <li>Minimally Invasive Spine Surgery</li>
+        <li>Sports Injury Fast-Track Program</li>
+        <li>Advanced Physiotherapy & Rehab</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card" data-dept="pediatrics">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=1200&q=90" alt="Pediatrics"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">👶 Pediatrics & Child Health</span>
+      <h2>Children's Health & Development Center</h2>
+      <p>A dedicated child-friendly environment offering neonatal care, developmental assessments, pediatric surgery, and adolescent medicine — designed around young patients and their families.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">8,400+</div><div class="s-meta-lbl">Patients/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">99%</div><div class="s-meta-lbl">Parent Satisfaction</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">31</div><div class="s-meta-lbl">Pediatricians</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Level III Neonatal ICU (NICU)</li>
+        <li>Pediatric Cardiac & Neuro Surgery</li>
+        <li>Developmental & Behavioral Pediatrics</li>
+        <li>Adolescent Medicine & Mental Health</li>
+        <li>Child Life Specialist Program</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card alt" data-dept="emergency">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=1200&q=90" alt="Emergency"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🚑 Emergency & Trauma</span>
+      <h2>Level I Trauma & Emergency Center</h2>
+      <p>Our Level I Trauma Center is staffed 24/7/365 with emergency physicians, trauma surgeons, and critical care specialists. Average door-to-physician time under 8 minutes.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">42,000+</div><div class="s-meta-lbl">ER Visits/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">&lt;8 min</div><div class="s-meta-lbl">Door-to-Doctor</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">24/7</div><div class="s-meta-lbl">Always Open</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Level I Trauma Designation</li>
+        <li>Dedicated Stroke & STEMI Fast Tracks</li>
+        <li>Helicopter Landing Pad (Rooftop)</li>
+        <li>Pediatric Emergency Rooms</li>
+        <li>On-Site CT, MRI & Cath Lab</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Get Emergency Info ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card" data-dept="diagnostics">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1200&q=90" alt="Diagnostics"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🔬 Diagnostics & Imaging</span>
+      <h2>Advanced Diagnostic Imaging Center</h2>
+      <p>State-of-the-art imaging with 3T MRI, 128-slice CT, PET-CT, and AI-assisted radiology reads. Our CLIA-certified lab delivers results in as little as 2 hours for routine panels.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">120K+</div><div class="s-meta-lbl">Scans/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">2 hr</div><div class="s-meta-lbl">Turnaround</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">AI</div><div class="s-meta-lbl">Assisted Reads</div></div>
+      </div>
+      <ul class="s-features">
+        <li>3 Tesla MRI — Body & Neuro</li>
+        <li>PET-CT for Oncology Staging</li>
+        <li>Digital Mammography & DEXA</li>
+        <li>Interventional Radiology Suite</li>
+        <li>Same-Day Report via Patient Portal</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Book a Scan ✦</a>
+    </div>
+  </div>
+
+  <div class="service-big-card alt" data-dept="pulmonology">
+    <div class="s-img"><img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=90" alt="Pulmonology"><div class="s-img-overlay"></div></div>
+    <div class="s-info">
+      <span class="tag">🫁 Pulmonology & Sleep Medicine</span>
+      <h2>Lung Health & Respiratory Care</h2>
+      <p>Comprehensive respiratory care covering asthma, COPD, sleep-disordered breathing, interstitial lung disease, and lung cancer screening — all in one dedicated center.</p>
+      <div class="s-meta">
+        <div class="s-meta-item"><div class="s-meta-num">5,200+</div><div class="s-meta-lbl">Patients/Year</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">93%</div><div class="s-meta-lbl">Improvement Rate</div></div>
+        <div class="s-meta-item"><div class="s-meta-num">14</div><div class="s-meta-lbl">Pulmonologists</div></div>
+      </div>
+      <ul class="s-features">
+        <li>Full Sleep Study Lab (12 pods)</li>
+        <li>Bronchoscopy & EBUS</li>
+        <li>Pulmonary Hypertension Clinic</li>
+        <li>Post-COVID Respiratory Rehab</li>
+        <li>Low-Dose CT Lung Cancer Screening</li>
+      </ul>
+      <a href="contact.html" class="btn-primary">Schedule Consultation ✦</a>
+    </div>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <h3>No services found</h3>
+    <p>Try a different filter or <span style="color:#0d9488;cursor:pointer;font-weight:600;" onclick="filterServices('all')">view all services</span>.</p>
+  </div>
+
+</div>
+
+<!-- PROCEDURES GRID -->
+<section class="section" style="background:#f8fffe;">
+  <div style="text-align:center;margin-bottom:52px;">
+    <div class="section-label">All Specialties</div>
+    <h2 class="section-title">Every Specialty <span>Under One Roof</span></h2>
+    <p class="section-subtitle" style="margin:0 auto;">48 departments staffed by 600+ specialists — everything from routine checkups to rare disease management.</p>
+  </div>
+  <div class="proc-grid">
+    <div class="proc-card"><span class="proc-dept">Cardiology</span><span class="proc-icon">❤️</span><h3>Interventional Cardiology</h3><p>Angioplasty, stent placement, and catheter-based procedures for coronary artery disease.</p><span class="proc-duration">⏱ 1–3 hour procedures</span></div>
+    <div class="proc-card"><span class="proc-dept">Neurology</span><span class="proc-icon">🧠</span><h3>Stroke Rehabilitation</h3><p>Intensive neuro-rehab programs restoring speech, mobility and independence after stroke.</p><span class="proc-duration">⏱ 4–6 week programs</span></div>
+    <div class="proc-card"><span class="proc-dept">Oncology</span><span class="proc-icon">🎗️</span><h3>Radiation Therapy</h3><p>Stereotactic radiosurgery, IMRT and proton therapy with sub-millimeter precision targeting.</p><span class="proc-duration">⏱ 15–45 min sessions</span></div>
+    <div class="proc-card"><span class="proc-dept">Orthopedics</span><span class="proc-icon">🦴</span><h3>Joint Replacement</h3><p>Robotic-assisted knee, hip and shoulder replacements with rapid recovery protocols.</p><span class="proc-duration">⏱ Same-day discharge</span></div>
+    <div class="proc-card"><span class="proc-dept">Ophthalmology</span><span class="proc-icon">👁️</span><h3>Ophthalmology</h3><p>LASIK, cataract surgery, retinal treatments, and pediatric eye care with cutting-edge lasers.</p><span class="proc-duration">⏱ 30-min procedures</span></div>
+    <div class="proc-card"><span class="proc-dept">Oral Surgery</span><span class="proc-icon">🦷</span><h3>Oral & Maxillofacial</h3><p>Dental implants, jaw reconstruction, TMJ treatment, and facial trauma care.</p><span class="proc-duration">⏱ 1–3 hour procedures</span></div>
+    <div class="proc-card"><span class="proc-dept">Pediatrics</span><span class="proc-icon">👶</span><h3>Neonatal ICU</h3><p>Level III NICU providing advanced care for premature and critically ill newborns.</p><span class="proc-duration">⏱ 24/7 monitoring</span></div>
+    <div class="proc-card"><span class="proc-dept">Pulmonology</span><span class="proc-icon">🫁</span><h3>Sleep Medicine</h3><p>Overnight sleep studies and CPAP management for obstructive sleep apnea and insomnia.</p><span class="proc-duration">⏱ Overnight study</span></div>
+    <div class="proc-card"><span class="proc-dept">Diagnostics</span><span class="proc-icon">🧪</span><h3>Clinical Laboratory</h3><p>CLIA-certified lab handling 800+ test types with stat results in under 2 hours.</p><span class="proc-duration">⏱ 2-hour results</span></div>
+    <div class="proc-card"><span class="proc-dept">Hematology</span><span class="proc-icon">🩸</span><h3>Hematology</h3><p>Blood disorders, anemia, coagulation defects, and bone marrow biopsy & transplant.</p><span class="proc-duration">⏱ Specialist consultation</span></div>
+    <div class="proc-card"><span class="proc-dept">Genetics</span><span class="proc-icon">🧬</span><h3>Genetic Medicine</h3><p>Hereditary cancer screening, prenatal genetics, and pharmacogenomics testing.</p><span class="proc-duration">⏱ Genetic counseling</span></div>
+    <div class="proc-card"><span class="proc-dept">Psychiatry</span><span class="proc-icon">🧘</span><h3>Mental Health & Psychiatry</h3><p>Inpatient and outpatient psychiatric care, TMS therapy, and integrated behavioral health.</p><span class="proc-duration">⏱ Walk-in available</span></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" style="background:white;">
+  <div style="text-align:center;margin-bottom:52px;">
+    <div class="section-label">Care Plans</div>
+    <h2 class="section-title">Transparent <span>Pricing</span></h2>
+    <p class="section-subtitle" style="margin:0 auto;text-align:center;">No surprise bills. Clear pricing with insurance coordination support included in every plan.</p>
+  </div>
+  <div class="grid-3">
+    <div class="price-card">
+      <div class="price-plan">Essential</div>
+      <h3>Primary Care Plan</h3>
+      <div class="price-amount">₹2,499</div>
+      <div class="price-sub">/month per person</div>
+      <ul class="price-features">
+        <li>Unlimited Primary Care Visits</li>
+        <li>Annual Comprehensive Physical</li>
+        <li>Basic Lab Work Included</li>
+        <li>Telehealth 24/7 Access</li>
+        <li>Prescription Management</li>
+        <li>Nurse Hotline Support</li>
+      </ul>
+      <a href="contact.html" class="btn-outline" style="display:block;text-align:center;">Get Started</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">Most Popular</div>
+      <div class="price-plan">Complete</div>
+      <h3>Premium Health Plan</h3>
+      <div class="price-amount">₹6,999</div>
+      <div class="price-sub">/month per person</div>
+      <ul class="price-features">
+        <li>Everything in Essential</li>
+        <li>Specialist Referrals (No Wait)</li>
+        <li>Advanced Imaging Priority</li>
+        <li>Mental Health Sessions</li>
+        <li>Nutrition Counseling</li>
+        <li>Personal Health Coach</li>
+        <li>Priority ER Fast-Track</li>
+      </ul>
+      <a href="contact.html" style="display:block;text-align:center;padding:11px 24px;background:white;color:#0d9488;border-radius:10px;font-weight:700;text-decoration:none;transition:all 0.3s;">Get Started ✦</a>
+    </div>
+    <div class="price-card">
+      <div class="price-plan">Enterprise</div>
+      <h3>Corporate Health Plan</h3>
+      <div class="price-amount" style="font-size:38px;line-height:1.3;">Custom</div>
+      <div class="price-sub">/pricing for teams</div>
+      <ul class="price-features">
+        <li>Everything in Premium</li>
+        <li>On-Site Medical Team</li>
+        <li>Executive Health Program</li>
+        <li>Wellness Workshops</li>
+        <li>Dedicated Account Manager</li>
+        <li>Custom Benefit Design</li>
+        <li>International Coverage</li>
+      </ul>
+      <a href="contact.html" class="btn-outline" style="display:block;text-align:center;">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo"><img src="logo-stackly.png" alt="Stackly" class="nav-logo-img" style="filter:brightness(0) invert(1);height:36px;"></a>
+      <p>Transforming healthcare through innovation, compassion, and clinical excellence. Your health is our highest priority.</p>
+      <div style="margin-top:20px;display:flex;gap:12px;">
+        <div style="margin-top:20px; display:flex; gap:12px;">
+          <!-- X (Twitter) -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
+            </svg>
+          </a>
+
+          <!-- Facebook -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+
+          <!-- LinkedIn -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </a>
+
+          <!-- YouTube -->
+          <a href="./error.html" style="width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;text-decoration:none;transition:background 0.3s;" onmouseover="this.style.background='#0d9488'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0.0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About Us</a></li><li><a href="services.html">Services</a></li><li><a href="care.html">Care Programs</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Specialties</h4><ul><li><a href="#">Cardiology</a></li><li><a href="#">Neurology</a></li><li><a href="#">Oncology</a></li><li><a href="#">Orthopedics</a></li><li><a href="#">Pediatrics</a></li><li><a href="#">Emergency</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><a href="#">📍 MMR Complex, Salem, Tamil Nadu 636 008</a></li><li><a href="tel:+919876543210">📞 +91 9876543210</a></li><li><a href="mailto:care@stackly.com">✉️ care@stackly.com</a></li><li><a href="#">🕐 Mon–Fri: 7AM–8PM</a></li><li><a href="#">🚨 Emergency: 24/7</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 STACKLY Health Systems. All rights reserved.</span>
+    <div style="display:flex;gap:24px;">
+      <a href="./error.html" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;">Privacy Policy</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;">Terms of Service</a>
+      <a href="./error.html" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;">HIPAA Notice</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// FILTER ENGINE
+const allCards = document.querySelectorAll('.service-big-card[data-dept]');
+const resultCount = document.getElementById('result-count');
+const emptyState = document.getElementById('emptyState');
+const filterClear = document.getElementById('filterClear');
+document.getElementById('cnt-all').textContent = allCards.length;
+
+function filterServices(dept){
+  document.querySelectorAll('.service-tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.filter === dept);
+  });
+  filterClear.classList.toggle('visible', dept !== 'all');
+
+  let visible = 0, firstVisible = null;
+  allCards.forEach(card=>{
+    const match = dept === 'all' || card.dataset.dept === dept;
+    if(match){
+      card.classList.remove('hidden');
+      card.classList.remove('fade-in');
+      void card.offsetWidth;
+      card.style.animationDelay = (visible * 80) + 'ms';
+      card.classList.add('fade-in');
+      if(!firstVisible) firstVisible = card;
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  resultCount.textContent = visible;
+  emptyState.classList.toggle('visible', visible === 0);
+
+  const navH = 72 + 52 + 42;
+  if(dept !== 'all' && firstVisible){
+    setTimeout(()=>{
+      window.scrollTo({top: firstVisible.getBoundingClientRect().top + window.scrollY - navH - 16, behavior:'smooth'});
+    }, 60);
+  } else {
+    const cont = document.getElementById('servicesContainer');
+    setTimeout(()=>{
+      window.scrollTo({top: cont.getBoundingClientRect().top + window.scrollY - navH - 16, behavior:'smooth'});
+    }, 60);
+  }
+}
+
+document.querySelectorAll('.service-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=> filterServices(tab.dataset.filter));
+  tab.setAttribute('tabindex','0');
+  tab.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tab.click();}});
+});
+
+// MOBILE NAV
+const navToggle = document.getElementById('navToggle');
+const mobileNav = document.getElementById('mobileNav');
+const mobileNavClose = document.getElementById('mobileNavClose');
+function openMobileNav(){mobileNav.classList.add('open');navToggle.classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileNav(){mobileNav.classList.remove('open');navToggle.classList.remove('open');document.body.style.overflow='';}
+navToggle.addEventListener('click',()=>mobileNav.classList.contains('open')?closeMobileNav():openMobileNav());
+mobileNavClose.addEventListener('click',closeMobileNav);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileNav();});
+</script>
+</body>
+</html>

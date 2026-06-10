@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STACKLY Healthcare — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root {
+  --teal:#4fa8a8; --teal-light:#7ec8c8; --teal-dark:#3a8686;
+  --slate:#4a6fa5; --slate-dk:#35517a;
+  --deep:#1a2e4a; --deep2:#0e1c2e; --navy-dk:#060e18;
+  --powder-lt:#e4edf5; --muted:#607488; --gold:#f0a833;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;background:var(--deep2);overflow-x:hidden;}
+
+/* BG */
+canvas#login-canvas{position:fixed;inset:0;z-index:0;}
+.login-bg-glow{
+  position:fixed;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 70% 70% at 25% 50%,rgba(79,168,168,0.14) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 20%,rgba(74,111,165,0.12) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 60% at 70% 80%,rgba(126,200,200,0.08) 0%,transparent 50%);
+}
+.grid-overlay{
+  position:fixed;inset:0;z-index:1;
+  background-image:linear-gradient(rgba(126,200,200,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(126,200,200,0.04) 1px,transparent 1px);
+  background-size:50px 50px;
+}
+
+/* LAYOUT */
+.login-wrapper{position:relative;z-index:10;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+
+/* LEFT PANEL */
+.login-left{display:flex;flex-direction:column;justify-content:center;padding:60px 64px;position:relative;overflow:hidden;}
+.left-decorative-circle{position:absolute;border-radius:50%;border:1px solid rgba(126,200,200,0.12);}
+.ldc-1{width:500px;height:500px;top:-100px;left:-200px;}
+.ldc-2{width:300px;height:300px;bottom:-50px;right:-100px;}
+.ldc-3{width:200px;height:200px;top:50%;left:60%;}
+.nav-logo-img{height:40px;width:auto;object-fit:contain;filter:brightness(0) invert(1);}
+.left-headline{font-family:'Playfair Display',serif;font-size:clamp(30px,3.2vw,50px);font-weight:700;color:white;line-height:1.1;margin:28px 0 18px;}
+.left-headline em{color:var(--teal-light);font-style:normal;}
+.left-sub{color:rgba(255,255,255,0.52);font-size:15px;line-height:1.7;margin-bottom:36px;max-width:380px;}
+.feature-list{display:flex;flex-direction:column;gap:13px;}
+.feature-item{display:flex;align-items:center;gap:14px;color:rgba(255,255,255,0.72);font-size:14px;}
+.feature-icon{width:36px;height:36px;flex-shrink:0;background:rgba(79,168,168,0.14);border:1px solid rgba(79,168,168,0.28);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.testimonial-card{margin-top:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:22px;backdrop-filter:blur(10px);}
+.tcard-stars{color:var(--gold);font-size:13px;margin-bottom:9px;}
+.tcard-text{color:rgba(255,255,255,0.7);font-size:13px;line-height:1.6;font-style:italic;margin-bottom:12px;}
+.tcard-author{display:flex;align-items:center;gap:12px;}
+.tcard-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;}
+.tcard-name{color:white;font-weight:600;font-size:13px;}
+.tcard-role{color:rgba(255,255,255,0.38);font-size:11px;}
+
+/* RIGHT PANEL */
+.login-right{display:flex;align-items:center;justify-content:center;padding:48px 64px;background:rgba(6,14,24,0.55);border-left:1px solid rgba(255,255,255,0.06);overflow-y:auto;}
+.auth-box{width:100%;max-width:440px;}
+
+/* MOBILE LOGO */
+.mobile-logo-bar{
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding-bottom:28px;
+}
+.mobile-logo-bar a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
+.mobile-logo-bar img{height:36px;width:auto;filter:brightness(0) invert(1);}
+.mobile-logo-bar .brand-text{
+  font-family:'Playfair Display',serif;
+  color:white;font-size:20px;font-weight:700;letter-spacing:-0.3px;
+}
+
+/* TOGGLE */
+.auth-toggle{display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:5px;margin-bottom:32px;}
+.toggle-btn{flex:1;padding:12px;background:none;border:none;color:rgba(255,255,255,0.45);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif;}
+.toggle-btn.active{background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));color:white;box-shadow:0 4px 20px rgba(79,168,168,0.4);}
+.auth-title{font-family:'Playfair Display',serif;color:white;font-size:26px;font-weight:700;margin-bottom:6px;}
+.auth-sub{color:rgba(255,255,255,0.42);font-size:14px;margin-bottom:26px;}
+
+/* FORMS */
+.form-panel{display:none;}
+.form-panel.active{display:flex;flex-direction:column;gap:15px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field-group{display:flex;flex-direction:column;gap:6px;}
+.field-label{color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:14px;color:rgba(255,255,255,0.28);pointer-events:none;}
+.auth-input{width:100%;padding:13px 16px 13px 44px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.3s;}
+.auth-input::placeholder{color:rgba(255,255,255,0.22);}
+.auth-input:focus{border-color:rgba(79,168,168,0.7);background:rgba(79,168,168,0.08);box-shadow:0 0 0 3px rgba(79,168,168,0.14);}
+.auth-input.error{border-color:rgba(251,113,133,0.7);box-shadow:0 0 0 3px rgba(251,113,133,0.14);}
+.auth-input.match{border-color:rgba(79,168,168,0.7);box-shadow:0 0 0 3px rgba(79,168,168,0.14);}
+.auth-input[type="date"]{color-scheme:dark;}
+.eye-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-size:15px;transition:color 0.3s;z-index:2;line-height:1;}
+.eye-toggle:hover{color:var(--teal-light);}
+.error-msg{color:#fb7185;font-size:12px;display:none;}
+.success-msg{color:var(--teal-light);font-size:12px;display:none;align-items:center;gap:4px;}
+.strength-bar{display:flex;gap:4px;margin-top:5px;}
+.strength-seg{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;}
+.strength-seg.weak{background:#fb7185;}.strength-seg.medium{background:#f0a833;}.strength-seg.strong{background:var(--teal-light);}
+.form-meta{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+.remember-label{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;}
+.remember-label input{accent-color:var(--teal);width:14px;height:14px;}
+.forgot-link{color:var(--teal-light);font-size:13px;text-decoration:none;font-weight:500;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.forgot-link:hover{opacity:0.75;}
+.btn-login{width:100%;padding:15px;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;margin-top:4px;font-family:'DM Sans',sans-serif;letter-spacing:0.3px;}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(79,168,168,0.5);}
+.btn-login:disabled{opacity:0.65;cursor:not-allowed;transform:none;}
+.divider{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.2);font-size:12px;margin:4px 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
+.social-btns{display:flex;gap:10px;}
+.social-btn{flex:1;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;font-family:'DM Sans',sans-serif;text-decoration:none;}
+.social-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+.social-btn svg{width:18px;height:18px;flex-shrink:0;}
+.auth-switch{text-align:center;color:rgba(255,255,255,0.38);font-size:13px;margin-top:16px;}
+.auth-switch a{color:var(--teal-light);font-weight:600;text-decoration:none;cursor:pointer;}
+.back-link{text-align:center;margin-top:8px;}
+.back-link a{color:rgba(255,255,255,0.28);font-size:13px;text-decoration:none;}
+.back-link a:hover{color:rgba(255,255,255,0.6);}
+
+/* ROLE SELECTOR */
+.role-selector{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.role-card{padding:13px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;}
+.role-card.selected{background:rgba(79,168,168,0.14);border-color:rgba(79,168,168,0.5);}
+.role-card-icon{font-size:22px;display:block;margin-bottom:5px;}
+.role-card-label{color:rgba(255,255,255,0.55);font-size:12px;font-weight:600;}
+.role-card.selected .role-card-label{color:var(--teal-light);}
+
+/* ── SIGNUP TOAST ── */
+.toast-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.toast-overlay.show{opacity:1;pointer-events:all;}
+.toast-box{background:var(--deep2);border:1px solid rgba(79,168,168,0.35);border-radius:24px;padding:44px 48px;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 60px rgba(79,168,168,0.18);transform:scale(0.85);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);max-width:400px;width:90%;}
+.toast-overlay.show .toast-box{transform:scale(1);}
+.toast-icon{width:68px;height:68px;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 8px 30px rgba(79,168,168,0.5);}
+.toast-title{font-family:'Playfair Display',serif;color:white;font-size:22px;font-weight:700;margin-bottom:10px;}
+.toast-msg{color:rgba(255,255,255,0.58);font-size:14px;line-height:1.6;margin-bottom:22px;}
+.toast-user{color:var(--teal-light);font-weight:700;}
+.toast-btn{padding:13px 32px;background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s;}
+.toast-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,168,168,0.5);}
+@keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+
+/* ── FORGOT PASSWORD MODAL ── */
+.modal-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-backdrop.show{opacity:1;pointer-events:all;}
+.modal-card{background:var(--deep2);border:1px solid rgba(79,168,168,0.3);border-radius:24px;padding:40px 40px 36px;max-width:400px;width:90%;transform:scale(0.88) translateY(20px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+.modal-backdrop.show .modal-card{transform:scale(1) translateY(0);}
+.modal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.4);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.modal-close:hover{background:rgba(255,255,255,0.14);color:white;}
+.modal-icon{width:56px;height:56px;background:rgba(79,168,168,0.14);border:1px solid rgba(79,168,168,0.3);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px;}
+.modal-title{font-family:'Playfair Display',serif;color:white;font-size:22px;font-weight:700;margin-bottom:8px;}
+.modal-sub{color:rgba(255,255,255,0.45);font-size:14px;line-height:1.6;margin-bottom:24px;}
+.modal-success{display:none;text-align:center;padding:10px 0 4px;}
+.modal-success-icon{font-size:42px;margin-bottom:12px;}
+.modal-success-text{color:var(--teal-light);font-size:15px;font-weight:600;margin-bottom:6px;}
+.modal-success-sub{color:rgba(255,255,255,0.42);font-size:13px;line-height:1.6;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.login-left,.login-right{padding:48px 44px;}}
+@media(max-width:900px){
+  .login-wrapper{grid-template-columns:1fr;}
+  .login-left{display:none;}
+  .mobile-logo-bar{display:flex;}
+  .login-right{
+    padding:40px 36px;min-height:100vh;
+    align-items:flex-start;overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  body{overflow:auto;}
+  .auth-box{padding-top:0;}
+}
+@media(max-width:600px){
+  .login-right{padding:32px 20px;}
+  .auth-box{max-width:100%;}
+  .auth-title{font-size:22px;}
+  .mobile-logo-bar{padding-bottom:24px;}
+}
+@media(max-width:480px){
+  .form-row{grid-template-columns:1fr;}
+  .login-right{padding:24px 16px;}
+  .toast-box{padding:36px 24px;}
+  .modal-card{padding:32px 24px 28px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="login-canvas"></canvas>
+<div class="login-bg-glow"></div>
+<div class="grid-overlay"></div>
+
+<!-- SIGNUP TOAST -->
+<div class="toast-overlay" id="signup-toast">
+  <div class="toast-box">
+    <div class="toast-icon">🎉</div>
+    <div class="toast-title">Account Created!</div>
+    <p class="toast-msg">
+      Your STACKLY account has been created successfully.<br>
+      <span class="toast-user" id="signup-toast-user"></span>
+    </p>
+    <button class="toast-btn" onclick="goToSignIn()">Continue to Sign In →</button>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-backdrop" id="forgot-modal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeForgotModal()" aria-label="Close">✕</button>
+
+    <!-- Form state -->
+    <div id="forgot-form-state">
+      <div class="modal-icon">🔑</div>
+      <div class="modal-title">Forgot password?</div>
+      <p class="modal-sub">Enter the email address linked to your account. We'll send you a reset link.</p>
+      <div class="field-group" style="margin-bottom:16px;">
+        <label class="field-label">Email Address</label>
+        <div class="field-wrap">
+          <span class="field-icon">✉️</span>
+          <input type="email" class="auth-input" id="forgot-email" placeholder="Enter your email">
+        </div>
+        <div class="error-msg" id="err-forgot-email">Please enter a valid email address.</div>
+      </div>
+      <button class="btn-login" id="btn-forgot" onclick="handleForgotPassword()">Send Reset Link →</button>
+    </div>
+
+    <!-- Success state -->
+    <div class="modal-success" id="forgot-success-state">
+      <div class="modal-success-icon">📬</div>
+      <div class="modal-success-text">Reset link sent!</div>
+      <p class="modal-success-sub">Check your inbox at <strong id="forgot-sent-email" style="color:var(--teal-light);font-weight:600;"></strong>. The link expires in 15 minutes.</p>
+      <button class="toast-btn" style="margin-top:22px;" onclick="closeForgotModal()">Back to Sign In</button>
+    </div>
+  </div>
+</div>
+
+<div class="login-wrapper">
+
+  <!-- LEFT PANEL (desktop) -->
+  <div class="login-left">
+    <div class="left-decorative-circle ldc-1"></div>
+    <div class="left-decorative-circle ldc-2"></div>
+    <div class="left-decorative-circle ldc-3"></div>
+    <a href="index.html"><img src="logo-stackly.png" alt="STACKLY" class="nav-logo-img"></a>
+    <h1 class="left-headline">Your Health.<br>Our <em>Priority.</em><br>Always.</h1>
+    <p class="left-sub">Access your personalized health portal — appointments, records, prescriptions, and expert care — all in one secure place.</p>
+    <div class="feature-list">
+      <div class="feature-item"><div class="feature-icon">📋</div><span>Instant access to medical records &amp; test results</span></div>
+      <div class="feature-item"><div class="feature-icon">📅</div><span>Book &amp; manage appointments with top specialists</span></div>
+      <div class="feature-item"><div class="feature-icon">💊</div><span>Prescription refills and medication tracking</span></div>
+      <div class="feature-item"><div class="feature-icon">📱</div><span>24/7 telehealth consultations from anywhere</span></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"STACKLY's portal completely changed how I manage my health. Everything is seamless — from booking to getting results."</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar">S</div>
+        <div>
+          <div class="tcard-name">Sarah Krishnamurthy</div>
+          <div class="tcard-role">Patient since 2021</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div class="auth-box">
+
+      <!-- MOBILE LOGO -->
+      <div class="mobile-logo-bar">
+        <a href="index.html">
+          <img src="logo-stackly.png" alt="STACKLY" style="height:36px;width:auto;filter:brightness(0) invert(1);">
+        </a>
+      </div>
+
+      <!-- TOGGLE -->
+      <div class="auth-toggle">
+        <button class="toggle-btn active" id="toggle-signin" onclick="switchMode('signin')">Sign In</button>
+        <button class="toggle-btn" id="toggle-signup" onclick="switchMode('signup')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="form-panel active" id="panel-signin">
+        <div>
+          <h2 class="auth-title">Welcome back</h2>
+          <p class="auth-sub">Sign in to your STACKLY account</p>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:10px;">Sign in as</div>
+          <div class="role-selector">
+            <div class="role-card selected" id="role-patient" onclick="selectRole('patient')">
+              <span class="role-card-icon">🧑‍⚕️</span>
+              <div class="role-card-label">Patient</div>
+            </div>
+            <div class="role-card" id="role-doctor" onclick="selectRole('doctor')">
+              <span class="role-card-icon">👨‍⚕️</span>
+              <div class="role-card-label">Doctor / Admin</div>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email Address</label>
+          <div class="field-wrap">
+            <span class="field-icon">✉️</span>
+            <input type="email" class="auth-input" id="signin-email" placeholder="Enter your email">
+          </div>
+          <div class="error-msg" id="err-signin-email">Please enter a valid email address.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" class="auth-input" id="signin-pass" placeholder="Enter your password">
+            <button class="eye-toggle" type="button" onclick="togglePw('signin-pass',this)">👁️</button>
+          </div>
+          <div class="error-msg" id="err-signin-pass">Please enter your password.</div>
+        </div>
+        <div class="form-meta">
+          <label class="remember-label"><input type="checkbox" id="remember-me"> Remember me</label>
+          <button class="forgot-link" onclick="openForgotModal()">Forgot password?</button>
+        </div>
+        <button class="btn-login" id="btn-signin" onclick="handleLogin()">Sign In →</button>
+        <div class="divider">or continue with</div>
+        <div class="social-btns">
+          <a class="social-btn" href="error.html">
+            <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.3 0-9.7-2.9-11.3-7l-6.6 4.8C9.7 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.5 5.8l6.2 5.2C40.8 35.4 44 30.1 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+            Continue with Google
+          </a>
+        </div>
+        <!-- <div class="auth-switch">Don't have an account? <a onclick="switchMode('signup')">Sign Up</a></div> -->
+        <div class="back-link"><a href="index.html">← Back to Home</a></div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="form-panel" id="panel-signup">
+        <div>
+          <h2 class="auth-title">Create account</h2>
+          <p class="auth-sub">Join 48,000+ patients on STACKLY Health</p>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label class="field-label">First Name</label>
+            <div class="field-wrap"><span class="field-icon">👤</span><input type="text" class="auth-input" id="signup-fname" placeholder="Enter your first name"></div>
+            <div class="error-msg" id="err-fname">First name is required.</div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Last Name</label>
+            <div class="field-wrap"><span class="field-icon">👤</span><input type="text" class="auth-input" id="signup-lname" placeholder="Enter your last name"></div>
+            <div class="error-msg" id="err-lname">Last name is required.</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email Address</label>
+          <div class="field-wrap"><span class="field-icon">✉️</span><input type="email" class="auth-input" id="signup-email" placeholder="Enter your email address"></div>
+          <div class="error-msg" id="err-email">Please enter a valid email.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Phone Number</label>
+          <div class="field-wrap"><span class="field-icon">📞</span><input type="tel" class="auth-input" id="signup-phone" placeholder="Enter your phone number"></div>
+          <div class="error-msg" id="err-phone">Phone number is required.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Age</label>
+          <div class="field-wrap"><span class="field-icon">📅</span><input type="tel" class="auth-input" id="signup-age" placeholder="Enter your age"></div>
+          <div class="error-msg" id="err-age">Age is required.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Create Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" class="auth-input" id="pw-signup" placeholder="Min. 8 characters" oninput="checkStrength(this.value); checkConfirm();">
+            <button class="eye-toggle" type="button" onclick="togglePw('pw-signup',this)">👁️</button>
+          </div>
+          <div class="strength-bar">
+            <div class="strength-seg" id="seg1"></div><div class="strength-seg" id="seg2"></div>
+            <div class="strength-seg" id="seg3"></div><div class="strength-seg" id="seg4"></div>
+          </div>
+          <div class="error-msg" id="err-pw">Password must be at least 8 characters.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Confirm Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔑</span>
+            <input type="password" class="auth-input" id="pw-confirm" placeholder="Re-enter your password" oninput="checkConfirm()">
+            <button class="eye-toggle" type="button" onclick="togglePw('pw-confirm',this)">👁️</button>
+          </div>
+          <div class="error-msg" id="err-pw-confirm">Passwords do not match.</div>
+          <div class="success-msg" id="ok-pw-confirm" style="display:none;">✔ Passwords match</div>
+        </div>
+        <button class="btn-login" id="btn-signup" onclick="handleSignup()">Create My Account →</button>
+        <div class="divider">or sign up with</div>
+        <div class="social-btns">
+          <a class="social-btn" href="error.html">
+            <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.3 0-9.7-2.9-11.3-7l-6.6 4.8C9.7 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.4-2.5 4.4-4.5 5.8l6.2 5.2C40.8 35.4 44 30.1 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+            Continue with Google
+          </a>
+        </div>
+        <p style="color:rgba(255,255,255,0.28);font-size:12px;text-align:center;margin-top:12px;">
+          By creating an account you agree to our
+          <a href="./error.html" style="color:var(--teal-light);">Terms</a> and
+          <a href="./error.html" style="color:var(--teal-light);">Privacy Policy</a>
+        </p>
+        <div class="auth-switch">Already have an account? <a onclick="switchMode('signin')">Sign In</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ CANVAS PARTICLES ══ */
+const canvas = document.getElementById('login-canvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+class Particle{
+  constructor(){this.reset();}
+  reset(){this.x=Math.random()*canvas.width;this.y=Math.random()*canvas.height;this.vx=(Math.random()-0.5)*0.4;this.vy=(Math.random()-0.5)*0.4;this.r=Math.random()*1.8+0.5;this.a=Math.random()*0.35+0.1;}
+  update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height)this.reset();}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=`rgba(79,168,168,${this.a})`;ctx.fill();}
+}
+const particles=Array.from({length:110},()=>new Particle());
+function drawLines(){for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.strokeStyle=`rgba(79,168,168,${0.1*(1-d/120)})`;ctx.lineWidth=0.5;ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();}}}
+(function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);drawLines();particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(animate);})();
+
+/* ══ DECORATIVE CIRCLES ══ */
+let a1=0,a2=0;
+setInterval(()=>{a1+=0.5;a2-=0.5;const c1=document.querySelector('.ldc-1'),c2=document.querySelector('.ldc-2');if(c1)c1.style.transform=`rotate(${a1}deg)`;if(c2)c2.style.transform=`rotate(${a2}deg)`;},50);
+
+/* ══ GSAP ENTRANCE ══ */
+window.addEventListener('DOMContentLoaded',()=>{
+  const tl=gsap.timeline({defaults:{ease:'power3.out'},delay:0.1});
+  tl.fromTo('.login-left > *',{opacity:0,x:-30},{opacity:1,x:0,stagger:0.1,duration:0.7},0);
+  tl.fromTo('.mobile-logo-bar',{opacity:0,y:-20},{opacity:1,y:0,duration:0.5},0);
+  tl.fromTo('.auth-toggle',{opacity:0,y:-20},{opacity:1,y:0,duration:0.5},0.15);
+  tl.fromTo('.auth-title,.auth-sub',{opacity:0,y:20},{opacity:1,y:0,stagger:0.08,duration:0.55},0.3);
+  tl.fromTo('.field-group,.role-selector,.form-meta,.btn-login,.divider,.social-btns,.auth-switch,.back-link',
+    {opacity:0,y:16},{opacity:1,y:0,stagger:0.05,duration:0.5},0.45);
+});
+
+/* ══ STATE ══ */
+let selectedRole='patient';
+let accounts=JSON.parse(localStorage.getItem('medicore_accounts')||'{}');
+
+/* ══ HELPERS ══ */
+function switchMode(mode){
+  const si=document.getElementById('panel-signin'),su=document.getElementById('panel-signup');
+  const ti=document.getElementById('toggle-signin'),tu=document.getElementById('toggle-signup');
+  if(mode==='signin'){ti.classList.add('active');tu.classList.remove('active');su.classList.remove('active');si.classList.add('active');}
+  else{tu.classList.add('active');ti.classList.remove('active');si.classList.remove('active');su.classList.add('active');}
+  const panel=mode==='signin'?si:su;
+  gsap.fromTo(panel.children,{opacity:0,y:14},{opacity:1,y:0,stagger:0.05,duration:0.4,ease:'power2.out'});
+}
+function selectRole(role){
+  selectedRole=role;
+  document.getElementById('role-patient').classList.toggle('selected',role==='patient');
+  document.getElementById('role-doctor').classList.toggle('selected',role==='doctor');
+}
+function togglePw(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁️':'🙈';}
+function checkStrength(val){
+  const segs=['seg1','seg2','seg3','seg4'].map(id=>document.getElementById(id));
+  segs.forEach(s=>{s.className='strength-seg';});
+  let score=0;
+  if(val.length>=6)score++;if(val.length>=10)score++;
+  if(/[A-Z]/.test(val)&&/[0-9]/.test(val))score++;if(/[^A-Za-z0-9]/.test(val))score++;
+  const cls=score<=1?'weak':score<=2?'medium':'strong';
+  for(let i=0;i<score;i++)segs[i].classList.add(cls);
+}
+
+/* ══ CONFIRM PASSWORD LIVE CHECK ══ */
+function checkConfirm(){
+  const pw=document.getElementById('pw-signup').value;
+  const confirm=document.getElementById('pw-confirm').value;
+  const errEl=document.getElementById('err-pw-confirm');
+  const okEl=document.getElementById('ok-pw-confirm');
+  const confirmInput=document.getElementById('pw-confirm');
+  if(confirm.length===0){errEl.style.display='none';okEl.style.display='none';confirmInput.classList.remove('error','match');return;}
+  if(pw===confirm){errEl.style.display='none';okEl.style.display='flex';confirmInput.classList.remove('error');confirmInput.classList.add('match');}
+  else{okEl.style.display='none';errEl.style.display='block';confirmInput.classList.add('error');confirmInput.classList.remove('match');}
+}
+
+function showErr(id,show){const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+function markInput(id,err){const el=document.getElementById(id);if(el)el.classList.toggle('error',err);}
+
+/* ══ LOGIN — no toast, direct redirect ══ */
+function handleLogin(){
+  const email=document.getElementById('signin-email').value.trim();
+  const pass=document.getElementById('signin-pass').value;
+  const rx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let valid=true;
+  if(!email||!rx.test(email)){showErr('err-signin-email',true);markInput('signin-email',true);valid=false;}
+  else{showErr('err-signin-email',false);markInput('signin-email',false);}
+  if(!pass){showErr('err-signin-pass',true);markInput('signin-pass',true);valid=false;}
+  else{showErr('err-signin-pass',false);markInput('signin-pass',false);}
+  if(!valid)return;
+
+  const btn=document.getElementById('btn-signin');
+  btn.textContent='Sign in…';btn.disabled=true;
+
+  setTimeout(()=>{
+    btn.textContent='Sign In →';btn.disabled=false;
+    const stored=accounts[email];
+    const name=stored?stored.name:(email.split('@')[0]);
+    const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    sessionStorage.setItem('medicore_current_user',JSON.stringify({
+      email,name,initials,
+      role:selectedRole,
+      phone:stored?stored.phone:'',
+      age:stored?stored.age:''
+    }));
+    if(selectedRole==='doctor'){window.location.href='admin-dashboard.html';}
+    else{window.location.href='user-dashboard.html';}
+  },1400);
+}
+
+/* ══ SIGNUP ══ */
+function handleSignup(){
+  const fname=document.getElementById('signup-fname').value.trim();
+  const lname=document.getElementById('signup-lname').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const phone=document.getElementById('signup-phone').value.trim();
+  const age=document.getElementById('signup-age').value.trim();
+  const pass=document.getElementById('pw-signup').value;
+  const confirm=document.getElementById('pw-confirm').value;
+  const rx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let valid=true;
+  if(!fname){showErr('err-fname',true);markInput('signup-fname',true);valid=false;}else{showErr('err-fname',false);markInput('signup-fname',false);}
+  if(!lname){showErr('err-lname',true);markInput('signup-lname',true);valid=false;}else{showErr('err-lname',false);markInput('signup-lname',false);}
+  if(!email||!rx.test(email)){showErr('err-email',true);markInput('signup-email',true);valid=false;}else{showErr('err-email',false);markInput('signup-email',false);}
+  if(!phone){showErr('err-phone',true);markInput('signup-phone',true);valid=false;}else{showErr('err-phone',false);markInput('signup-phone',false);}
+  if(!age){showErr('err-age',true);markInput('signup-age',true);valid=false;}else{showErr('err-age',false);markInput('signup-age',false);}
+  if(pass.length<8){showErr('err-pw',true);markInput('pw-signup',true);valid=false;}else{showErr('err-pw',false);markInput('pw-signup',false);}
+  if(pass!==confirm){
+    showErr('err-pw-confirm',true);
+    document.getElementById('ok-pw-confirm').style.display='none';
+    markInput('pw-confirm',true);valid=false;
+  } else if(confirm.length===0){
+    showErr('err-pw-confirm',true);
+    document.getElementById('err-pw-confirm').textContent='Please confirm your password.';
+    markInput('pw-confirm',true);valid=false;
+  } else {
+    document.getElementById('err-pw-confirm').textContent='Passwords do not match.';
+    showErr('err-pw-confirm',false);markInput('pw-confirm',false);
+  }
+  if(!valid)return;
+
+  const btn=document.getElementById('btn-signup');
+  btn.textContent='Creating account…';btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='Create My Account →';btn.disabled=false;
+    accounts[email]={name:fname+' '+lname,email,phone,age,pass};
+    localStorage.setItem('medicore_accounts',JSON.stringify(accounts));
+    document.getElementById('signup-toast-user').textContent=fname+' '+lname+' · '+email;
+    document.getElementById('signup-toast').classList.add('show');
+  },1400);
+}
+
+function goToSignIn(){
+  document.getElementById('signup-toast').classList.remove('show');
+  document.getElementById('signin-email').value=document.getElementById('signup-email').value.trim();
+  switchMode('signin');
+}
+
+/* ══ FORGOT PASSWORD MODAL ══ */
+function openForgotModal(){
+  // Reset to form state
+  document.getElementById('forgot-form-state').style.display='block';
+  document.getElementById('forgot-success-state').style.display='none';
+  document.getElementById('forgot-email').value='';
+  document.getElementById('forgot-email').classList.remove('error');
+  showErr('err-forgot-email',false);
+  document.getElementById('btn-forgot').textContent='Send Reset Link →';
+  document.getElementById('btn-forgot').disabled=false;
+  document.getElementById('forgot-modal').classList.add('show');
+}
+
+function closeForgotModal(){
+  document.getElementById('forgot-modal').classList.remove('show');
+}
+
+function handleForgotPassword(){
+  const email=document.getElementById('forgot-email').value.trim();
+  const rx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!email||!rx.test(email)){
+    showErr('err-forgot-email',true);
+    markInput('forgot-email',true);
+    return;
+  }
+  showErr('err-forgot-email',false);
+  markInput('forgot-email',false);
+  const btn=document.getElementById('btn-forgot');
+  btn.textContent='Sending…';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('forgot-sent-email').textContent=email;
+    document.getElementById('forgot-form-state').style.display='none';
+    document.getElementById('forgot-success-state').style.display='block';
+  },1400);
+}
+
+// Close modal on backdrop click
+document.getElementById('forgot-modal').addEventListener('click',function(e){
+  if(e.target===this)closeForgotModal();
+});
+
+document.querySelectorAll('.auth-input').forEach(inp=>
+  inp.addEventListener('input',()=>{
+    inp.classList.remove('error');
+    if(inp.id!=='pw-confirm')inp.classList.remove('match');
+  })
+);
+</script>
+</body>
+</html>

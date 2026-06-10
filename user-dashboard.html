@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STACKLY — My Health Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --teal:#4fa8a8; --teal-light:#7ec8c8; --teal-dark:#3a8686;
+  --slate:#4a6fa5; --deep:#1a2e4a; --deep2:#0e1c2e;
+  --powder-lt:#e4edf5; --muted:#607488; --gold:#f0a833;
+  --sidebar-bg:linear-gradient(180deg,#0e1c2e 0%,#1a2e4a 100%);
+  --sidebar-w:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:#f0f4f8;overflow-x:hidden;}
+
+.dash-layout{display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--sidebar-bg);
+  min-height:100vh;display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;overflow-y:auto;
+  z-index:300;transition:transform 0.3s ease;
+}
+.sidebar-logo{
+  padding:22px 20px 18px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.nav-logo-img{height:34px;width:auto;filter:brightness(0) invert(1);flex-shrink:0;}
+
+/* Close button inside sidebar logo row — mobile only */
+.sidebar-close-btn{
+  display:none;
+  margin-left:auto;
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.6);font-size:16px;cursor:pointer;
+  align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.sidebar-close-btn:hover{background:rgba(255,255,255,0.16);color:white;}
+
+/* User info — NO avatar, text only */
+.sidebar-user{
+  padding:14px 20px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  margin-bottom:6px;
+  min-width:0;
+}
+.user-name{
+  color:white;font-size:14px;font-weight:600;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.user-id{
+  color:rgba(255,255,255,0.45);font-size:11px;margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:block;
+}
+
+.nav-section{
+  padding:10px 18px 4px;
+  color:rgba(255,255,255,0.25);font-size:10px;
+  letter-spacing:2px;text-transform:uppercase;font-weight:700;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 18px;margin:2px 8px;border-radius:12px;
+  color:rgba(255,255,255,0.52);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .22s;text-decoration:none;
+}
+.nav-item:hover{background:rgba(126,200,200,0.12);color:var(--teal-light);}
+.nav-item.active{
+  background:rgba(79,168,168,0.2);color:var(--teal-light);
+  border:1px solid rgba(79,168,168,0.25);
+}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:#fb7185;color:white;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;
+}
+.logout-btn{
+  width:calc(100% - 16px);margin:8px;padding:11px;
+  background:rgba(251,113,133,0.1);border:1px solid rgba(251,113,133,0.2);
+  border-radius:12px;color:#fb7185;font-size:13px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .3s;font-family:'DM Sans',sans-serif;
+}
+.logout-btn:hover{background:rgba(251,113,133,0.2);}
+
+/* Mobile open-sidebar button in topbar */
+.topbar-menu-btn{
+  display:none;
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));
+  border:none;cursor:pointer;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 4px 14px rgba(79,168,168,0.4);
+  flex-shrink:0;
+}
+.topbar-menu-btn span{display:block;width:16px;height:2px;background:white;border-radius:2px;}
+
+/* overlay */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.55);z-index:299;
+  backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+
+/* ══ MAIN ══ */
+.dash-main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;transition:margin-left 0.3s;}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  background:white;border-bottom:1px solid rgba(74,111,165,0.12);
+  padding:0 28px;height:68px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:50;
+  box-shadow:0 1px 12px rgba(26,46,74,0.06);gap:12px;
+}
+.topbar-left{flex:1;min-width:0;}
+.topbar-left h1{font-family:'Playfair Display',serif;font-size:20px;color:var(--deep);font-weight:700;}
+.topbar-left p{color:var(--muted);font-size:12px;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.notif-btn{
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid rgba(79,168,168,0.2);background:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:17px;position:relative;flex-shrink:0;
+}
+.notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:7px;height:7px;background:#fb7185;border-radius:50%;border:2px solid white;
+}
+
+/* ══ CONTENT ══ */
+.content{padding:28px;}
+
+/* ══ HEALTH HERO ══ */
+.health-hero{
+  background:linear-gradient(135deg,#0e1c2e 0%,#1a2e4a 55%,#35517a 100%);
+  border-radius:22px;padding:36px;position:relative;overflow:hidden;margin-bottom:24px;
+}
+.health-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(126,200,200,0.18) 0%,transparent 60%);
+}
+.health-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;position:relative;z-index:1;}
+.hero-greeting{color:rgba(255,255,255,0.55);font-size:13px;margin-bottom:5px;}
+.hero-name{font-family:'Playfair Display',serif;color:white;font-size:clamp(24px,2.8vw,38px);font-weight:700;margin-bottom:14px;line-height:1.15;}
+.hero-name em{color:var(--teal-light);font-style:normal;}
+.health-score-wrap{display:flex;align-items:center;gap:18px;margin-bottom:22px;}
+.health-score-circle{
+  width:84px;height:84px;flex-shrink:0;border-radius:50%;position:relative;
+  background:conic-gradient(var(--teal-light) 0% 82%,rgba(255,255,255,0.1) 82% 100%);padding:4px;
+}
+.hsc-inner{
+  background:#1a2e4a;border-radius:50%;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+}
+.hsc-num{color:white;font-size:20px;font-weight:700;}
+.hsc-label{color:rgba(255,255,255,0.38);font-size:9px;letter-spacing:1px;}
+.score-info-title{color:white;font-size:15px;font-weight:600;margin-bottom:4px;}
+.score-info-sub{color:rgba(255,255,255,0.48);font-size:12px;line-height:1.5;}
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.qa-btn{
+  padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;border:none;
+  display:flex;align-items:center;gap:6px;
+}
+.qa-teal{background:linear-gradient(135deg,var(--teal-dark),var(--teal-light));color:white;}
+.qa-teal:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,168,168,0.4);}
+.qa-glass{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.14);}
+.qa-glass:hover{background:rgba(255,255,255,0.18);}
+.health-stats-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.hstat-card{
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;padding:16px;backdrop-filter:blur(10px);
+}
+.hstat-label{color:rgba(255,255,255,0.42);font-size:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
+.hstat-value{color:white;font-size:22px;font-weight:700;}
+.hstat-unit{color:rgba(255,255,255,0.38);font-size:11px;margin-left:3px;}
+.hstat-trend{font-size:10px;margin-top:3px;}
+.trend-up{color:#22c55e;}.trend-dn{color:#fb7185;}
+
+/* ══ STATS GRID ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{
+  background:white;border-radius:16px;padding:20px;
+  border:1px solid rgba(74,111,165,0.1);
+  box-shadow:0 4px 16px rgba(26,46,74,0.06);
+  display:flex;align-items:center;gap:14px;transition:all .3s;
+}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(26,46,74,0.12);}
+.stat-icon{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.stat-icon.teal{background:rgba(79,168,168,0.12);}
+.stat-icon.sky{background:rgba(106,168,208,0.12);}
+.stat-icon.gold{background:rgba(240,168,51,0.12);}
+.stat-icon.rose{background:rgba(251,113,133,0.12);}
+.stat-val{font-size:24px;font-weight:700;color:var(--deep);}
+.stat-lbl{color:var(--muted);font-size:11px;margin-top:2px;}
+
+/* ══ GRIDS ══ */
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:24px;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px;}
+
+/* ══ CARD ══ */
+.card{background:white;border-radius:18px;border:1px solid rgba(74,111,165,0.1);box-shadow:0 4px 16px rgba(26,46,74,0.06);overflow:hidden;}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(74,111,165,0.08);}
+.card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--deep);}
+.card-link{color:var(--teal);font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;}
+.card-body{padding:22px;}
+
+/* APPOINTMENTS */
+.appt-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(74,111,165,0.06);}
+.appt-item:last-child{border:none;padding-bottom:0;}
+.appt-date{width:48px;height:52px;background:linear-gradient(135deg,var(--deep),var(--teal-dark));border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.appt-day{color:white;font-size:16px;font-weight:700;}
+.appt-mon{color:rgba(255,255,255,0.55);font-size:9px;letter-spacing:1px;}
+.appt-info{flex:1;min-width:0;}
+.appt-doc{font-weight:600;color:var(--deep);font-size:13px;}
+.appt-spec{color:var(--muted);font-size:11px;margin-top:2px;}
+.appt-time{color:var(--muted);font-size:11px;margin-top:2px;}
+.appt-status{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.status-confirmed{background:rgba(79,168,168,0.12);color:var(--teal-dark);}
+.status-pending{background:rgba(240,168,51,0.12);color:#b07000;}
+
+/* VITALS */
+.vitals-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.vital-card{background:var(--powder-lt);border-radius:12px;padding:14px;}
+.vital-name{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.vital-val{font-size:20px;font-weight:700;color:var(--deep);}
+.vital-unit{font-size:11px;color:var(--muted);margin-left:2px;}
+.vital-bar{height:3px;background:rgba(74,111,165,0.15);border-radius:2px;margin-top:8px;overflow:hidden;}
+.vital-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal-dark),var(--teal-light));}
+.vital-status{font-size:10px;margin-top:5px;font-weight:600;}
+.vs-normal{color:#16a34a;}.vs-elevated{color:#d97706;}.vs-low{color:#dc2626;}
+
+/* MEDS */
+.med-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(74,111,165,0.06);}
+.med-item:last-child{border:none;padding-bottom:0;}
+.med-icon{width:38px;height:38px;border-radius:10px;background:rgba(79,168,168,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.med-name{font-weight:600;color:var(--deep);font-size:13px;}
+.med-dose{color:var(--muted);font-size:11px;margin-top:1px;}
+.med-schedule{margin-left:auto;text-align:right;flex-shrink:0;}
+.med-time{color:var(--teal-dark);font-size:11px;font-weight:600;}
+.med-refill{color:var(--gold);font-size:10px;margin-top:2px;}
+
+/* TEST RESULTS */
+.test-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(74,111,165,0.06);}
+.test-item:last-child{border:none;padding-bottom:0;}
+.test-icon{width:38px;height:38px;border-radius:10px;background:var(--powder-lt);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.test-name{font-weight:600;color:var(--deep);font-size:12px;}
+.test-date{color:var(--muted);font-size:10px;margin-top:1px;}
+.test-result-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;flex-shrink:0;}
+.result-normal{background:rgba(34,197,94,0.1);color:#16a34a;}
+.result-review{background:rgba(240,168,51,0.12);color:#b07000;}
+.dl-btn{margin-left:auto;background:none;border:1px solid rgba(79,168,168,0.2);color:var(--teal);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.dl-btn:hover{background:rgba(79,168,168,0.08);}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — cascade from large → small
+   ══════════════════════════════════════ */
+
+/* Large desktop — sidebar slightly narrower */
+@media(max-width:1280px){
+  .sidebar{ width:230px; }
+  .dash-main{ margin-left:230px; }
+  .stats-grid{ grid-template-columns:repeat(2,1fr); }
+  .three-col{ grid-template-columns:1fr 1fr; }
+}
+
+/* Tablet landscape */
+@media(max-width:1024px){
+  .health-hero-grid{ grid-template-columns:1fr; }
+  .two-col{ grid-template-columns:1fr; }
+  .three-col{ grid-template-columns:1fr 1fr; }
+}
+
+/* Tablet portrait / mobile — sidebar becomes drawer */
+@media(max-width:900px){
+  /* Sidebar: full-width drawer, slides in from left */
+  .sidebar{
+    width:280px;           /* fixed drawer width, NOT tied to --sidebar-w */
+    transform:translateX(-100%);
+  }
+  .sidebar.open{ transform:translateX(0); }
+
+  /* Show the close ✕ button inside sidebar header */
+  .sidebar-close-btn{ display:flex; }
+
+  /* Overlay dims the page behind the open drawer */
+  .sidebar-overlay{ display:block; }
+  .sidebar-overlay.active{ opacity:1; pointer-events:all; }
+
+  /* Main takes full viewport width */
+  .dash-main{ margin-left:0; }
+
+  /* Topbar: show ☰ button, normal padding */
+  .topbar{ padding:0 16px; gap:12px; }
+  .topbar-menu-btn{ display:flex; }
+
+  /* Stack multi-column layouts */
+  .three-col{ grid-template-columns:1fr; }
+  .health-hero{ padding:24px 20px; }
+  .content{ padding:16px; }
+}
+
+/* Mobile */
+@media(max-width:640px){
+  .stats-grid{ grid-template-columns:1fr 1fr; }
+  .health-stats-mini{ grid-template-columns:1fr 1fr; }
+  .content{ padding:12px; }
+  .topbar-left h1{ font-size:17px; }
+  .topbar-left p{ font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .quick-actions{ gap:6px; }
+  .qa-btn{ padding:8px 12px; font-size:11px; }
+}
+
+/* Small mobile */
+@media(max-width:400px){
+  .stats-grid{ grid-template-columns:1fr; }
+  .vitals-grid{ grid-template-columns:1fr; }
+  .two-col{ grid-template-columns:1fr; }
+  .content{ padding:10px; }
+  .health-hero{ padding:18px 14px; }
+}
+</style>
+</head>
+<body>
+<div class="dash-layout">
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="./index.html"><img src="logo-stackly.png" alt="STACKLY" class="nav-logo-img"></a>
+    <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">✕</button>
+  </div>
+
+  <!-- User info — NO avatar element at all -->
+  <div class="sidebar-user">
+    <div class="user-name" id="user-sidebar-name">James</div>
+    <span class="user-id" id="user-sidebar-id">ID: MC-48291</span>
+  </div>
+
+  <a class="nav-item active"><span class="nav-icon">🏠</span> Dashboard</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">📅</span> Appointments <span class="nav-badge">2</span></a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">💊</span> Medications</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">🧪</span> Test Results</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">📋</span> Medical Records</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">📄</span> Prescriptions</a>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">💳</span> Billing & Insurance</a>
+  <div class="nav-section">Account</div>
+  <a href="./error.html" class="nav-item"><span class="nav-icon">👤</span> My Profile</a>
+  <button class="logout-btn" onclick="window.location.href='login.html'">🚪 Sign Out</button>
+</aside>
+
+<!-- MAIN -->
+<main class="dash-main">
+  <div class="topbar">
+    <button class="topbar-menu-btn" id="topbar-menu-btn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-left">
+      <h1>My Health Dashboard</h1>
+      <p id="topbar-greeting">Tuesday, June 9, 2026 — Good morning!</p>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn"><span>🔔</span><span class="notif-dot"></span></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- HEALTH HERO -->
+    <div class="health-hero" id="health-hero">
+      <div class="health-hero-grid">
+        <div>
+          <p class="hero-greeting">Good morning ☀️</p>
+          <h2 class="hero-name">Welcome back,<br><em id="hero-user-name">Arjun Sharma</em></h2>
+          <div class="health-score-wrap">
+            <div class="health-score-circle">
+              <div class="hsc-inner"><div class="hsc-num" id="hs-num">0</div><div class="hsc-label">/ 100</div></div>
+            </div>
+            <div>
+              <div class="score-info-title">Health Score: Good 🟢</div>
+              <div class="score-info-sub">Your overall health indicators are looking great. Keep up your current routine.</div>
+            </div>
+          </div>
+          <div class="quick-actions">
+            <button class="qa-btn qa-teal">📱 Start Telehealth</button>
+            <button class="qa-btn qa-glass">📅 Book Appointment</button>
+            <button class="qa-btn qa-glass">💊 Refill Rx</button>
+          </div>
+        </div>
+        <div class="health-stats-mini">
+          <div class="hstat-card"><div class="hstat-label">Blood Pressure</div><div class="hstat-value">118<span class="hstat-unit">/ 76</span></div><div class="hstat-trend trend-up">↑ Normal Range</div></div>
+          <div class="hstat-card"><div class="hstat-label">Heart Rate</div><div class="hstat-value">72<span class="hstat-unit">bpm</span></div><div class="hstat-trend trend-up">↑ Optimal</div></div>
+          <div class="hstat-card"><div class="hstat-label">Blood Glucose</div><div class="hstat-value">94<span class="hstat-unit">mg/dL</span></div><div class="hstat-trend trend-up">↑ Normal</div></div>
+          <div class="hstat-card"><div class="hstat-label">BMI</div><div class="hstat-value">23.4</div><div class="hstat-trend trend-up">↑ Healthy</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon teal">📅</div><div><div class="stat-val">3</div><div class="stat-lbl">Upcoming Appointments</div></div></div>
+      <div class="stat-card"><div class="stat-icon sky">💊</div><div><div class="stat-val">4</div><div class="stat-lbl">Active Medications</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold">🧪</div><div><div class="stat-val">2</div><div class="stat-lbl">Pending Test Results</div></div></div>
+      <div class="stat-card"><div class="stat-icon rose">💬</div><div><div class="stat-val">5</div><div class="stat-lbl">Unread Messages</div></div></div>
+    </div>
+
+    <!-- APPOINTMENTS + VITALS -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Upcoming Appointments</div><a class="card-link">View All →</a></div>
+        <div class="card-body">
+          <div class="appt-item"><div class="appt-date"><div class="appt-day">12</div><div class="appt-mon">JUN</div></div><div class="appt-info"><div class="appt-doc">Dr. Priya Menon</div><div class="appt-spec">Cardiologist · Heart Center</div><div class="appt-time">🕙 10:30 AM · In-Person</div></div><div class="appt-status status-confirmed">Confirmed</div></div>
+          <div class="appt-item"><div class="appt-date"><div class="appt-day">18</div><div class="appt-mon">JUN</div></div><div class="appt-info"><div class="appt-doc">Dr. Rahul Nair</div><div class="appt-spec">Endocrinologist · Diabetes Clinic</div><div class="appt-time">🕑 2:00 PM · Video Call</div></div><div class="appt-status status-confirmed">Confirmed</div></div>
+          <div class="appt-item"><div class="appt-date"><div class="appt-day">25</div><div class="appt-mon">JUN</div></div><div class="appt-info"><div class="appt-doc">Dr. Anjali Kapoor</div><div class="appt-spec">General Physician · Annual Checkup</div><div class="appt-time">🕙 11:00 AM · In-Person</div></div><div class="appt-status status-pending">Pending</div></div>
+          <div class="appt-item"><div class="appt-date"><div class="appt-day">02</div><div class="appt-mon">JUL</div></div><div class="appt-info"><div class="appt-doc">Dr. Karthik Suresh</div><div class="appt-spec">Neurologist · Follow-up</div><div class="appt-time">🕒 3:30 PM · In-Person</div></div><div class="appt-status status-pending">Pending</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">My Vitals</div><a class="card-link">Log New →</a></div>
+        <div class="card-body">
+          <div class="vitals-grid">
+            <div class="vital-card"><div class="vital-name">Blood Pressure</div><div class="vital-val">118<span class="vital-unit">/ 76 mmHg</span></div><div class="vital-bar"><div class="vital-fill" style="width:72%"></div></div><div class="vital-status vs-normal">✅ Normal</div></div>
+            <div class="vital-card"><div class="vital-name">Heart Rate</div><div class="vital-val">72<span class="vital-unit">bpm</span></div><div class="vital-bar"><div class="vital-fill" style="width:58%"></div></div><div class="vital-status vs-normal">✅ Optimal</div></div>
+            <div class="vital-card"><div class="vital-name">Oxygen (SpO₂)</div><div class="vital-val">98<span class="vital-unit">%</span></div><div class="vital-bar"><div class="vital-fill" style="width:98%"></div></div><div class="vital-status vs-normal">✅ Excellent</div></div>
+            <div class="vital-card"><div class="vital-name">Blood Glucose</div><div class="vital-val">94<span class="vital-unit">mg/dL</span></div><div class="vital-bar"><div class="vital-fill" style="width:65%"></div></div><div class="vital-status vs-normal">✅ Normal</div></div>
+            <div class="vital-card"><div class="vital-name">Cholesterol</div><div class="vital-val">188<span class="vital-unit">mg/dL</span></div><div class="vital-bar"><div class="vital-fill" style="width:80%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><div class="vital-status vs-elevated">⚠️ Borderline</div></div>
+            <div class="vital-card"><div class="vital-name">BMI</div><div class="vital-val">23.4</div><div class="vital-bar"><div class="vital-fill" style="width:55%"></div></div><div class="vital-status vs-normal">✅ Healthy</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDS + TESTS -->
+    <div class="three-col">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Medications</div><a class="card-link">Refill All →</a></div>
+        <div class="card-body">
+          <div class="med-item"><div class="med-icon">💊</div><div><div class="med-name">Metformin 500mg</div><div class="med-dose">Twice daily · Diabetes</div></div><div class="med-schedule"><div class="med-time">08:00 AM</div><div class="med-refill">5 days left</div></div></div>
+          <div class="med-item"><div class="med-icon">💊</div><div><div class="med-name">Atorvastatin 10mg</div><div class="med-dose">Once daily · Cholesterol</div></div><div class="med-schedule"><div class="med-time">10:00 PM</div><div class="med-refill">18 days left</div></div></div>
+          <div class="med-item"><div class="med-icon">💊</div><div><div class="med-name">Amlodipine 5mg</div><div class="med-dose">Once daily · BP Control</div></div><div class="med-schedule"><div class="med-time">08:00 AM</div><div class="med-refill">12 days left</div></div></div>
+          <div class="med-item"><div class="med-icon">💊</div><div><div class="med-name">Vitamin D3 1000IU</div><div class="med-dose">Once daily · Supplement</div></div><div class="med-schedule"><div class="med-time">Breakfast</div><div class="med-refill">30 days left</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Test Results</div><a class="card-link">View History →</a></div>
+        <div class="card-body">
+          <div class="test-item"><div class="test-icon">🩸</div><div><div class="test-name">Complete Blood Count</div><div class="test-date">June 01, 2026</div></div><span class="test-result-badge result-normal">Normal</span><button class="dl-btn">⬇</button></div>
+          <div class="test-item"><div class="test-icon">🧬</div><div><div class="test-name">HbA1c (Glycated)</div><div class="test-date">May 28, 2026</div></div><span class="test-result-badge result-review">Review</span><button class="dl-btn">⬇</button></div>
+          <div class="test-item"><div class="test-icon">❤️</div><div><div class="test-name">Lipid Profile</div><div class="test-date">May 20, 2026</div></div><span class="test-result-badge result-review">Monitor</span><button class="dl-btn">⬇</button></div>
+          <div class="test-item"><div class="test-icon">🫁</div><div><div class="test-name">Chest X-Ray</div><div class="test-date">May 10, 2026</div></div><span class="test-result-badge result-normal">Clear</span><button class="dl-btn">⬇</button></div>
+          <div class="test-item"><div class="test-icon">🔬</div><div><div class="test-name">Thyroid Function (TSH)</div><div class="test-date">April 15, 2026</div></div><span class="test-result-badge result-normal">Normal</span><button class="dl-btn">⬇</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+/* ══ SESSION ══ */
+(function(){
+  try {
+    const u = JSON.parse(sessionStorage.getItem('medicore_current_user') || '{}');
+    if (u.name) {
+      document.getElementById('hero-user-name').textContent = u.name;
+      document.getElementById('user-sidebar-name').textContent = u.name;
+      const first = u.name.split(' ')[0];
+      document.getElementById('topbar-greeting').textContent =
+        'Tuesday, June 9, 2026 — Good morning, ' + first + '!';
+    }
+    if (u.email) {
+      document.getElementById('user-sidebar-id').textContent = u.email;
+    }
+  } catch(e) {}
+})();
+
+/* ══ SIDEBAR TOGGLE ══ */
+const sidebar  = document.getElementById('sidebar');
+const overlay  = document.getElementById('sidebar-overlay');
+const menuBtn  = document.getElementById('topbar-menu-btn');
+const closeBtn = document.getElementById('sidebar-close-btn');
+
+function isMobile(){ return window.innerWidth <= 900; }
+
+function openSidebar(){
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar(){
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+menuBtn.addEventListener('click', openSidebar);
+closeBtn.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSidebar(); });
+window.addEventListener('resize', () => { if(!isMobile()) closeSidebar(); });
+
+/* ══ NAV ══ */
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('mouseenter', () => gsap.to(item, { x:4, duration:.18 }));
+  item.addEventListener('mouseleave', () => gsap.to(item, { x:0, duration:.18 }));
+  item.addEventListener('click', function(){
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    if(isMobile()) closeSidebar();
+  });
+});
+
+/* ══ GSAP ANIMATIONS ══ */
+gsap.registerPlugin(ScrollTrigger);
+if(!isMobile()){
+  gsap.fromTo('.sidebar', { x:-30, opacity:0 }, { x:0, opacity:1, duration:.7, ease:'power3.out' });
+}
+gsap.fromTo('#health-hero', { opacity:0, y:30 }, { opacity:1, y:0, duration:.8, ease:'power3.out', delay:.2 });
+gsap.fromTo('.stat-card',   { opacity:0, y:20 }, { opacity:1, y:0, stagger:.07, duration:.6, ease:'power3.out', delay:.4 });
+gsap.to({ n:0 }, { n:82, duration:2, delay:.5, ease:'power2.out',
+  onUpdate(){ document.getElementById('hs-num').textContent = Math.round(this.targets()[0].n); }
+});
+gsap.utils.toArray('.card').forEach(el => {
+  gsap.fromTo(el, { opacity:0, y:24 }, { opacity:1, y:0, duration:.7, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 90%', once:true } });
+});
+ScrollTrigger.create({ trigger:'.vitals-grid', start:'top 82%', once:true, onEnter:() => {
+  document.querySelectorAll('.vital-fill').forEach(bar => {
+    const w = bar.style.width; bar.style.width = '0';
+    gsap.to(bar, { width:w, duration:1.2, ease:'power3.out', delay:.1 });
+  });
+}});
+</script>
+</body>
+</html>
